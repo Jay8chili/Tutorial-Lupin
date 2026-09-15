@@ -1,0 +1,241 @@
+========================================================================
+ SIMULATION SYSTEM - CHANGELOG
+ Version 2.1.18
+========================================================================
+
+LOCALIZATION / LANGUAGE SYSTEM (new)
+------------------------------------------------------------------------
+- Merged in a full runtime localization system (Assets/Simulation
+  System/Platform/Language/): LocalizationManager (active language +
+  loaded text/audio pack, fires OnLanguageChanged), LocalizedText
+  (per-label component - static scene labels capture their authored
+  string as fallback on Awake, dynamic/instantiated labels localize
+  themselves on OnEnable), LocalizationData/LocalizationTable (the
+  key->text/audio data model and its ScriptableObject asset),
+  LocalizationDownloader, LanguageButton/LanguageSelector/
+  LanguageController/LanguageListLoader (language-picker UI), and
+  SimulationLocalizationInjector (localizes the Asset Bundle simulation
+  graph itself - prompt/pre/post text+audio and UIInteraction labels -
+  by snapshotting each SimulationState's authored values once, then
+  re-injecting on every language change so switching back to English
+  never gets stuck on a stale translation).
+- Added NewAPICollections.GetLanguages() and a langCode param on
+  GetSimulations() so the simulation list can be requested pre-filtered
+  by the active language.
+- Added the UniText bulk-conversion editor tooling (Assets/UniText/,
+  Assets/Editor/LocalizationScanner.cs, LocalizationTableWindow.cs,
+  UniTextSceneScanner.cs) used to migrate existing TMP_Text /
+  TextMeshProUGUI labels across the project to LightSide.UniText, the
+  text component the localization system drives.
+- Converted every UI text field the localization/UniText system touches
+  across the Simulation System and Platform/NewAPI UI scripts (bot
+  prompt/UI/progress text, static-UI prompt/clause text, progress bars,
+  login/device/content/leaderboard/data-container labels, keyboard
+  input feedback) from TMP_Text/TextMeshProUGUI to UniText, preserving
+  every First Air / Step Save-State / Assessment Scoring change from
+  2.1.17 untouched - none of that session's work was reverted by the
+  merge.
+  
+========================================================================
+ SIMULATION SYSTEM - CHANGELOG
+ Version 2.1.17
+========================================================================
+
+FIRST AIR SYSTEM (new)
+------------------------------------------------------------------------
+- Added FirstAirManager / FirstAirZone / FirstAirTrigger / FirstAirManagerEditor
+  - a full architectural mirror of ContaminationManager for tracking
+  "first air" breaches (unobstructed path to a critical site blocked by
+  a hand), minus the hand-speed sub-system (not conceptually relevant
+  here). Same per-zone colliders/uiPanel/contactThreshold/uiDelay/
+  displayDuration model, same onFirstAirTriggered/onFirstAirResolved
+  events, same editor "attach trigger to all colliders" button.
+- Wired into AssistantManager exactly like Contamination: independent
+  per-zone panel pop in/out, reference-counted pause/restart, its own
+  tracked panel set + TMP atlas warm-up - can be open at the same time
+  as Contamination and Hand-Speed panels without interrupting them.
+
+STEP SAVE-STATE / RESTART (new)
+------------------------------------------------------------------------
+- Restarting a step or interaction previously only reset each
+  Interaction's internal IsStarted/IsCompleted/timer flags - moved
+  objects stayed moved and other scripts never undid their progress.
+  Restart now works like a real save-state:
+  - Added StepStateComponent (abstract capture/restore contract),
+    SceneObjectSnapshot (generic transform/parent/active-state/Animator
+    undo for any prop - handles "was moved", "was enabled/disabled",
+    and "animation was played" in one component), and StepStateHook
+    (UnityEvent passthrough so any existing script can note down/undo
+    its own state from the Inspector with zero code changes).
+  - GrabInteraction and DetectInteraction now capture/restore their own
+    object transforms automatically; SimulationState gained an
+    extraStepStateHooks list (same drag-in-components pattern as
+    listOfInteractions) for anything else.
+  - Two restart granularities: RestartCurrentInteraction() reverts only
+    the currently-running interaction (baseline re-captured right
+    before each interaction's own turn, so it never undoes an earlier
+    interaction's legitimate progress); RestartCurrentState() reverts
+    the whole step back to how it looked the moment it started.
+  - Fixed a latent bug surfaced while wiring this through: restarting a
+    step was re-sending the PREVIOUS step's assessment score/message to
+    the backend on every restart (MoveToState's scoring block wasn't
+    guarded against restart calls). Now skipped correctly on restart.
+  - Pause/Resume needed no changes - confirmed all grabbable objects use
+    kinematic, no-gravity Rigidbodies with purely transform-driven
+    movement, so canInteract=false already fully freezes the scene.
+
+ASSESSMENT SCORING REWORK
+------------------------------------------------------------------------
+- Every assessed step is now compulsorily worth exactly 1 mark total.
+  AssessmentController.RecalculateInteractionShares() auto-divides that
+  1 mark evenly across interactionConfigs, rounded down to 1 decimal,
+  with the remainder going to the last interaction so the total always
+  sums to exactly 1 (e.g. 3 interactions -> 0.3, 0.3, 0.4). Runs
+  automatically via OnValidate() in the Editor and again as a runtime
+  safety net in AssessmentManager.BeginState().
+- Added three checkboxes to AssessmentController - Contamination
+  Assessed / First Air Assessed / Fast Hand Assessed - so each step
+  opts in individually to being scored against these ambient/global
+  systems (previously AssessmentManager had zero coupling to
+  ContaminationManager or FirstAirManager at all).
+- AssessmentManager now owns the penalty amounts centrally:
+  contaminationPenalty and firstAirPenalty default to the full 1-mark
+  step score (so a violation zeroes the step, clamped at the existing
+  floor of 0), fastHandPenalty defaults to 0.5. Subscribes directly to
+  ContaminationManager's onContaminationTriggered/onSpeedViolationTriggered
+  and FirstAirManager's onFirstAirTriggered.
+- Contamination and First Air triggers on an assessed step now replay
+  the same prompt + highlight reveal OnHintClicked already does
+  (AssistantManager.ShowHintPrompt + EnableVisualsForInteraction),
+  without touching hint bookkeeping/score. Fast Hand only deducts.
+- Added three per-step message fields to AssessmentController -
+  contaminationMessage ("Surface was Contaminated"), firstAirMessage
+  ("First air was disturbed"), hintTakenMessage ("Hint was taken") -
+  sent to the backend as that step's error_message
+  (AssessmentManager.GetStepMessage, priority Contamination > First
+  Air > Hint Taken > SimulationManager.assessmentStepMessage default).
+  SimulationManager.assessmentStepMessage itself replaces what used to
+  be a hardcoded "This Step Is Assessed" string literal.
+
+CONTAMINATION SYSTEM
+------------------------------------------------------------------------
+- Fixed root bug: SetActiveZone() was never called anywhere in the
+  project, so ContaminationManager's "active zone" was always null and
+  contamination/speed detection silently never fired for ANY zone.
+- Removed the single "active zone" model entirely. All configured zones
+  are now monitored simultaneously and independently (via Collider->Zone
+  and SpeedTrackingArea->Zone lookup tables built in Awake).
+- Each ContaminationZone now tracks its own trigger/resolve state, so
+  any number of zones can be triggered and show their popups AT THE
+  SAME TIME - no longer sequential/one-at-a-time.
+- Added a per-zone "UI Delay" field (uiDelay) - delay between contact
+  detection and the error/UI actually popping up (e.g. 3 = error shown
+  3 seconds after detection).
+- Added per-zone "UI Panel" (uiPanel) field - each contamination zone
+  now pops its own dedicated UI panel instead of one shared panel.
+- Added per-zone "Hand Speed UI Panel" (handSpeedUIPanel) field - each
+  zone now has its own popup for hand-speed violations too.
+- ContaminationManager now owns the VRHandSpeedTracker subscription
+  directly (moved from AssistantManager) and routes each speed
+  violation to the correct zone's handSpeedUIPanel.
+- All zones' speed tracking areas are now enabled by default (previously
+  all disabled forever, same root cause as above).
+- Added EnableZone(index) / reworked DisableZone(index) as optional
+  manual per-zone overrides.
+
+HAND SPEED TRACKING (VRHandSpeedTracker.cs)
+------------------------------------------------------------------------
+- Rewritten so left and right hands are tracked as fully independent
+  state (own area, threshold, trigger flag, resolve timer). Previously
+  a single global "triggered" flag meant one hand's violation blocked
+  the other hand's detection entirely.
+- Two different zones can now show hand-speed violations concurrently
+  (e.g. left hand fast in Zone A, right hand fast in Zone B, both UIs
+  shown at once).
+- OnSpeedViolationDetected / OnSpeedViolationResolved now pass the
+  SpeedTrackingArea involved, so listeners can resolve which zone
+  triggered it.
+
+ASSISTANT MANAGER (AssistantManager.cs)
+------------------------------------------------------------------------
+- Removed the single shared "Contamination Panel" field entirely -
+  contamination UI is now fully per-zone (driven by ContaminationManager).
+- Removed the entire legacy hand-speed panel system: vrHandSpeedTracker
+  reference, speedAlertPanel, speedAlertAnchor, and the Mode A/B
+  slide-to-anchor animation coroutines. Replaced with per-zone panels
+  driven by ContaminationManager's events.
+- Contamination and hand-speed panels are no longer limited to one
+  visible panel at a time - both now use per-panel tracking (a set of
+  currently-open panels + independent fade animations per panel) so
+  multiple zones' popups can be visible simultaneously without
+  interrupting or stashing one another.
+- Removed ActivePanel.Contamination from the single-panel state
+  machine - contamination is now a pure independent overlay, same as
+  hand-speed, and never interrupts/stashes the Prompt/Help/BotUI flow.
+- Simulation pause/restart is now reference-counted across concurrent
+  contamination panels: pauses once when the first zone triggers,
+  restarts once only after every concurrently-open zone has resolved.
+- Added a new "Pre/Post Prompt Panel" field (prePostPromptPanel /
+  prePostPromptText) - a dedicated default panel for pre-prompt and
+  post-prompt ("clause") text, separate from the main Bot Prompt Panel.
+  Resolution order: per-state static clause UI (if assigned) -> this
+  new Pre/Post Prompt Panel (if assigned) -> falls back to Bot Prompt
+  Panel (previous behaviour) if neither is set.
+
+GRAB / DETECT INTERACTION SAFETY
+------------------------------------------------------------------------
+- canInteract (Interactions.cs base class) converted from a plain
+  public field into a property with a single change-notification hook
+  (OnCanInteractChanged). Existing serialized values are preserved via
+  FormerlySerializedAs so no scene/prefab data was reset.
+- GrabInteraction now keeps its physical grab Collider in lockstep with
+  canInteract automatically, no matter which of the many systems that
+  set canInteract (SimulationManager pause/resume, DetectInteraction,
+  AssessmentManager's wrong-zone swaps, MoveToHelper, StartInteraction/
+  StopInteraction) triggers the change. The collider is enabled the
+  instant canInteract becomes true and disabled the instant it becomes
+  false - foolproof by construction rather than relying on every call
+  site to remember to do it.
+  - ForceUngrab never touches canInteract, so it needed no special
+    handling - the collider correctly stays exactly as canInteract
+    already has it.
+  - DontReleaseOnStateEnd is respected automatically: when true,
+    StopInteraction() intentionally skips setting canInteract = false,
+    so the collider correctly stays enabled across the state boundary.
+- GrabPinchDetector.TryGrab() now explicitly skips any grab whose
+  canInteract is false (defense-in-depth on top of the collider
+  toggle, since a grab can span multiple child colliders).
+
+STUCK-DETECT RACE CONDITION FIX (Timer.cs)
+------------------------------------------------------------------------
+- Root cause found for the intermittent (~30%) "pull object out at the
+  last second and the detect zone gets permanently stuck / disabled"
+  bug: Timer used async void + Task.Yield() for its wait loop, which is
+  NOT guaranteed to resume in lockstep with Unity's frame order. On
+  some frames its completion check could run before that same frame's
+  OnTriggerExit callback, racing against the trigger-exit's
+  StopTimer() call and occasionally leaving the timer's internal
+  "running" flag stuck true forever - after which the detect could
+  never be restarted, no matter how many times it was retried.
+- Fixed by rewriting Timer to run its wait loop as a real Unity
+  coroutine instead. Unity guarantees coroutine resumption happens
+  strictly after that frame's FixedUpdate/physics-trigger callbacks,
+  which structurally eliminates the race rather than just narrowing it.
+- Added a safety net in Interactions.OnDisable() (and CustomButton's
+  own OnDisable) that explicitly stops the timer: unlike the old async
+  implementation, a coroutine is silently killed by Unity the instant
+  its host is disabled, so this guarantees the timer's "running" state
+  can never be left stuck true if the interaction/button is disabled
+  mid-timer.
+- Timer's constructor now takes the owning MonoBehaviour (needed to
+  host the coroutine); both existing call sites (Interactions.cs,
+  CustomButton.cs) were updated accordingly.
+
+GRAB HIGHLIGHT FIX
+------------------------------------------------------------------------
+- Added GrabHighlightOptOut script. Added to the grab timer (radial /
+  proximity grab timer UI) object so it no longer gets swept into the
+  grab-highlight system's layer swap, fixing the grab interaction
+  highlight issue where the timer UI was incorrectly affected.
+
+========================================================================

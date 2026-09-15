@@ -1,0 +1,49 @@
+Grab Pose Studio — Changelog & Roadmap
+8Chili Technologies — Simulation System SDK
+============================================
+
+v1.0  Initial Release
+  + One-click launch from Edit Mode
+  + Additive Studio scene, simulation scene never touched
+  + Dynamic placement relative to XR Rig
+  + Runtime grabbable auto-discovery
+  + Next / Previous navigation (B / Y)
+  + Left & Right controller pose recording (X / A)
+  + RecordedPose assets → Assets/RecordedPoses/
+  + Live pose status per object
+  + BOT auto-hidden during session
+
+v1.1  Polish
+  + World Space status panel (replaces Game View overlay)
+  + Build Settings guard with one-click auto-add
+  + RecordedPoses/ folder auto-created on first recording
+
+v1.1.1  Fixes
+  + Platform enlarged 5x5m -> 8x8m for more movement room
+  + Rig teleport-back safety net (distance check vs Floor bounds, no wall collider)
+  + Grabbable list refreshes live (0.5s poll) — toggling a grab on/off updates the Studio list
+  + Exit Play Mode button on status panel, shown once every grab has both Left+Right covered
+  + Panel billboard locked to world-up — no more roll/tilt
+  + Exit button is a real hand-touch control (CustomButton + trigger collider)
+  + Fixed a NullReferenceException that was silently aborting panel construction
+  + Exit button hold time cut from 1s to 0.15s, plus haptic + scale-animation feedback
+
+v1.1.2  Production Fixes
+  + Fixed: Floor lookup was a global Find, could match another scene's Floor — now scoped
+    to the Studio scene only
+  + Fixed: XR Rig teleports now disable/re-enable CharacterController around the move
+    (matches TeleportManager's pattern)
+  + See RELEASE_NOTES.txt for root cause detail
+
+v1.2  Planned
+  ~ Pose preview in VR
+  ~ Auto-assign pose to GrabInteraction
+  ~ Auto-bake after assignment
+
+v2.0  Future
+  ~ Hand tracking recording
+  ~ Exit Studio workflow
+  ~ Re-record / delete in session
+
+============================================
++ Shipped   ~ Planned

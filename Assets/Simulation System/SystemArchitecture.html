@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulation System — Architecture</title>
+<style>
+  :root {
+    --paper: #f6f7f9;
+    --panel: #ffffff;
+    --ink: #1b2430;
+    --ink-muted: #5b6472;
+    --ink-faint: #8b93a1;
+    --line: #dadfe6;
+    --line-strong: #c2c9d2;
+    --accent: #0e8fa3;
+    --accent-ink: #066474;
+    --accent-soft: #e3f4f6;
+    --warn: #b4650a;
+    --warn-soft: #fbedda;
+    --danger: #b23a3a;
+    --danger-soft: #fbe7e5;
+    --owns: #6b4fbb;
+    --owns-soft: #efe9fb;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --radius: 4px;
+  }
+  :root[data-theme="dark"] {
+    --paper: #12161c; --panel: #171c23; --ink: #e7eaef; --ink-muted: #939caa; --ink-faint: #6a7280;
+    --line: #262d38; --line-strong: #333c49; --accent: #22d3ee; --accent-ink: #6fe6f7; --accent-soft: #12333a;
+    --warn: #e3a448; --warn-soft: #2e2313; --danger: #e2726b; --danger-soft: #2e1817;
+    --owns: #a992e8; --owns-soft: #241d38;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #12161c; --panel: #171c23; --ink: #e7eaef; --ink-muted: #939caa; --ink-faint: #6a7280;
+      --line: #262d38; --line-strong: #333c49; --accent: #22d3ee; --accent-ink: #6fe6f7; --accent-soft: #12333a;
+      --warn: #e3a448; --warn-soft: #2e2313; --danger: #e2726b; --danger-soft: #2e1817;
+      --owns: #a992e8; --owns-soft: #241d38;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--paper); color: var(--ink); font-family: var(--sans);
+    font-size: 15.5px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent-ink); }
+  button { font-family: inherit; }
+  *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .shell { display: grid; grid-template-columns: 272px minmax(0,1fr); min-height: 100vh; }
+  @media (max-width: 920px) { .shell { grid-template-columns: 1fr; } .rail { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--line); } }
+
+  .rail { position: sticky; top: 0; height: 100vh; overflow-y: auto; border-right: 1px solid var(--line); padding: 26px 20px 40px; background: var(--panel); }
+  .rail-brand { font-family: var(--mono); font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 4px; }
+  .rail-title { font-family: var(--mono); font-size: 15px; font-weight: 600; margin: 0 0 10px; }
+  .rail-version { font-family: var(--mono); font-size: 11px; color: var(--accent-ink); background: var(--accent-soft); display: inline-block; padding: 2px 7px; border-radius: var(--radius); margin-bottom: 18px; }
+  .theme-btn {
+    display: block; width: 100%; margin-bottom: 18px; padding: 7px 10px; font-family: var(--mono); font-size: 11.5px;
+    background: var(--panel); color: var(--ink-muted); border: 1px solid var(--line); border-radius: var(--radius); cursor: pointer;
+  }
+  .theme-btn:hover { color: var(--accent-ink); border-color: var(--accent); }
+  .rail-nav { list-style: none; margin: 0; padding: 14px 0 0; border-top: 1px solid var(--line); }
+  .rail-nav a { display: flex; gap: 10px; padding: 6px 4px; font-size: 13.2px; color: var(--ink-muted); text-decoration: none; border-radius: var(--radius); }
+  .rail-nav a:hover { background: var(--accent-soft); color: var(--accent-ink); }
+  .rail-nav .idx { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); min-width: 20px; }
+  .rail-nav a:hover .idx { color: var(--accent-ink); }
+  .rail-foot { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 10.8px; color: var(--ink-faint); line-height: 1.7; }
+
+  main { padding: 46px clamp(18px,4.5vw,68px) 120px; min-width: 0; }
+  .doc-head { max-width: 780px; margin-bottom: 50px; }
+  .eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-ink); margin: 0 0 12px; }
+  h1 { font-family: var(--mono); font-size: clamp(24px,3.2vw,32px); font-weight: 600; letter-spacing: -.01em; line-height: 1.2; margin: 0 0 14px; }
+  .doc-head p { max-width: 66ch; color: var(--ink-muted); }
+  .legend-row { display: flex; flex-wrap: wrap; gap: 16px 26px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .legend-row .item { display: inline-flex; align-items: center; gap: 8px; font-size: 12.8px; color: var(--ink-muted); }
+  .swatch { display: inline-block; width: 22px; height: 0; border-top-width: 2px; border-top-style: solid; }
+  .swatch.calls { border-color: var(--ink-muted); }
+  .swatch.event { border-color: var(--accent); border-top-style: dashed; }
+  .swatch.owns { border-color: var(--owns); border-top-width: 3px; }
+  .swatch.none { border-color: var(--line-strong); border-top-style: dotted; }
+
+  section.plate { max-width: 1180px; margin: 0 0 64px; scroll-margin-top: 20px; }
+  section.plate.narrow { max-width: 780px; }
+  .plate-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line-strong); }
+  .plate-fig { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); white-space: nowrap; }
+  h2 { font-family: var(--mono); font-size: 19px; font-weight: 600; margin: 0; }
+  h3 { font-family: var(--mono); font-size: 14.5px; font-weight: 600; margin: 28px 0 12px; }
+  section.plate > p.lead { max-width: 68ch; color: var(--ink-muted); margin-top: 0; }
+
+  .diagram-wrap {
+    display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 0;
+    border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); overflow: hidden;
+  }
+  @media (max-width: 800px) { .diagram-wrap { grid-template-columns: 1fr; } }
+
+  .diagram-canvas { overflow: auto; padding: 18px; }
+  .diagram-canvas svg { display: block; }
+
+  .diagram-panel { border-left: 1px solid var(--line); padding: 18px 18px 20px; background: var(--paper); min-width: 0; }
+  @media (max-width: 800px) { .diagram-panel { border-left: none; border-top: 1px solid var(--line); } }
+  .panel-hint { color: var(--ink-faint); font-size: 13px; }
+  .panel-kicker { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+  .diagram-panel h4 { font-family: var(--mono); font-size: 15px; margin: 0 0 8px; line-height: 1.35; }
+  .diagram-panel p { font-size: 13.6px; color: var(--ink-muted); margin: 8px 0 0; }
+  .panel-list { list-style: none; margin: 6px 0 0; padding: 0; }
+  .panel-list li { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px solid var(--line); }
+  .panel-list li:last-child { border-bottom: none; }
+  .edgejump { background: none; border: none; color: var(--ink); font-family: var(--mono); font-size: 12.3px; cursor: pointer; padding: 2px 0; text-align: left; }
+  .edgejump:hover { color: var(--accent-ink); }
+  .ekind { font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em; text-transform: uppercase; padding: 2px 6px; border-radius: 9px; white-space: nowrap; }
+  .ekind.calls { color: var(--ink-muted); background: var(--line); }
+  .ekind.event { color: var(--accent-ink); background: var(--accent-soft); }
+  .ekind.owns { color: var(--owns); background: var(--owns-soft); }
+  .ekind.none { color: var(--ink-faint); background: var(--line); }
+
+  .node-tags { margin: 4px 0 0; }
+  .ntag { display: inline-block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .03em; padding: 1px 6px; border-radius: 8px; margin: 2px 4px 2px 0; }
+  .ntag.core { color: var(--accent-ink); background: var(--accent-soft); }
+  .ntag.dead { color: var(--danger); background: var(--danger-soft); }
+  .ntag.warn { color: var(--warn); background: var(--warn-soft); }
+  .ntag.singleton { color: var(--owns); background: var(--owns-soft); }
+
+  /* SVG node/edge styling */
+  .node-box { fill: var(--panel); stroke: var(--line-strong); stroke-width: 1.3; transition: stroke .12s, fill .12s; }
+  .node { cursor: pointer; }
+  .node:hover .node-box, .node:focus-visible .node-box { stroke: var(--accent); }
+  .node.active .node-box { stroke: var(--accent); stroke-width: 2.2; fill: var(--accent-soft); }
+  .node-fo { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; padding: 5px 7px; }
+  .node-label { font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--ink); line-height: 1.25; }
+  .node.active .node-label { color: var(--accent-ink); }
+
+  .edge { cursor: pointer; }
+  .edge-hit { fill: none; stroke: transparent; stroke-width: 14; }
+  .edge-line { fill: none; stroke-width: 1.6; }
+  .kind-calls .edge-line { stroke: var(--ink-faint); }
+  .kind-event .edge-line { stroke: var(--accent); stroke-dasharray: 4 3; }
+  .kind-owns .edge-line { stroke: var(--owns); stroke-width: 2.4; }
+  .kind-none .edge-line { stroke: var(--line-strong); stroke-dasharray: 1.5 3; }
+  .edge:hover .edge-line, .edge:focus-visible .edge-line, .edge.active .edge-line { stroke-width: 3.2; }
+  .edge.active .edge-line { stroke: var(--accent) !important; stroke-dasharray: none !important; }
+  .arrowhead.calls { fill: var(--ink-faint); }
+  .arrowhead.event { fill: var(--accent); }
+  .arrowhead.owns { fill: var(--owns); }
+  .arrowhead.none { fill: var(--line-strong); }
+
+  /* tables & reference list */
+  .frame { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); overflow-x: auto; padding: 18px 20px; margin: 6px 0 18px; }
+  .frame table { border-collapse: collapse; width: 100%; font-size: 13.4px; }
+  .frame th, .frame td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .frame th { font-family: var(--mono); font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+  .frame tr:last-child td { border-bottom: none; }
+  code { font-family: var(--mono); font-size: .88em; background: var(--accent-soft); color: var(--accent-ink); padding: 1px 5px; border-radius: 3px; }
+
+  .search-box { display: block; width: 100%; max-width: 420px; margin: 4px 0 20px; padding: 9px 12px; font-family: var(--mono); font-size: 13px;
+    background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius); }
+  .search-box::placeholder { color: var(--ink-faint); }
+  .search-box:focus { border-color: var(--accent); }
+
+  .refgroup { margin: 0 0 26px; }
+  .refgroup h3 { display: flex; align-items: center; gap: 10px; margin-top: 0; }
+  .refgroup .count { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 10px; font-weight: 400; }
+  dl.reflist { margin: 0; }
+  dl.reflist > div { display: grid; grid-template-columns: 220px minmax(0,1fr); gap: 3px 20px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  dl.reflist > div:last-child { border-bottom: none; }
+  @media (max-width: 720px) { dl.reflist > div { grid-template-columns: 1fr; } }
+  dl.reflist dt { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+  dl.reflist dt .path { display: block; font-weight: 400; font-size: 10.6px; color: var(--ink-faint); margin-top: 2px; }
+  dl.reflist dd { margin: 0; font-size: 13.4px; color: var(--ink-muted); }
+  dl.reflist dd .rel { color: var(--ink-faint); font-size: 12.3px; }
+
+  .callout { border: 1px solid var(--line); border-radius: var(--radius); padding: 15px 19px; margin: 16px 0; background: var(--panel); }
+  .callout p { margin: 0; font-size: 13.8px; color: var(--ink-muted); }
+  .callout p + p { margin-top: 8px; }
+  .callout strong { color: var(--ink); }
+
+  .deadlist { list-style: none; margin: 0; padding: 0; }
+  .deadlist li { padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13.8px; color: var(--ink-muted); }
+  .deadlist li:last-child { border-bottom: none; }
+
+  footer.end { max-width: 780px; margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="rail" aria-label="Sections">
+    <p class="rail-brand">Simulation System</p>
+    <p class="rail-title">Architecture</p>
+    <span class="rail-version">v2.1.17 · 144 scripts</span>
+    <button class="theme-btn" id="themeToggle" type="button">Toggle light / dark</button>
+    <ul class="rail-nav">
+      <li><a href="#read"><span class="idx">00</span>How to read this</a></li>
+      <li><a href="#map"><span class="idx">01</span>Top-level module map</a></li>
+      <li><a href="#flow"><span class="idx">02</span>Simulation flow</a></li>
+      <li><a href="#grab"><span class="idx">03</span>Grab / Detect / Contamination / First Air</a></li>
+      <li><a href="#assist"><span class="idx">04</span>Assistant / Bot / Panels</a></li>
+      <li><a href="#assess"><span class="idx">05</span>Assessment &amp; scoring</a></li>
+      <li><a href="#highlight"><span class="idx">06</span>Grab highlight pipeline</a></li>
+      <li><a href="#platform"><span class="idx">07</span>Platform shell</a></li>
+      <li><a href="#location"><span class="idx">08</span>Location system</a></li>
+      <li><a href="#singletons"><span class="idx">09</span>Singleton inventory</a></li>
+      <li><a href="#reference"><span class="idx">10</span>Full script reference</a></li>
+      <li><a href="#dead"><span class="idx">11</span>Dead code &amp; orphans</a></li>
+    </ul>
+    <p class="rail-foot">Self-contained — no network<br>requests, no external files.<br>Open this .html anywhere.</p>
+  </nav>
+
+  <main>
+    <div class="doc-head">
+      <p class="eyebrow">System reference — version 2.1.17</p>
+      <h1>Simulation System — Architecture</h1>
+      <p>Every C# script under <code>Assets/Simulation System</code>, mapped by who calls, owns, or listens to whom. Click any box or line in a diagram for a full description — connections are just as clickable as the scripts they join.</p>
+      <div class="legend-row">
+        <span class="item"><span class="swatch calls"></span>calls / reads</span>
+        <span class="item"><span class="swatch event"></span>event subscription</span>
+        <span class="item"><span class="swatch owns"></span>owns / drives</span>
+        <span class="item"><span class="swatch none"></span>no connection found</span>
+      </div>
+    </div>
+
+    <section class="plate narrow" id="read">
+      <div class="plate-head"><span class="plate-fig">FIG. 00</span><h2>How to read this</h2></div>
+      <p class="lead">Diagrams are grouped by subsystem because a single 138-node graph is unreadable. Click a box for that script's role and every connection touching it; click a line for the specific relationship it represents. Section 10 is the flat per-script reference covering every file, including small leaf utilities that don't earn a diagram node — it has its own search box. <code>*.Instance</code> singletons are drawn as plain class names; assume singleton access unless noted.</p>
+    </section>
+
+    <section class="plate" id="map">
+      <div class="plate-head"><span class="plate-fig">FIG. 01</span><h2>Top-level module map</h2></div>
+      <div class="diagram-wrap">
+        <div class="diagram-canvas" id="canvas-map"></div>
+        <div class="diagram-panel" id="panel-map"><p class="panel-hint">Click a box or connection for details.</p></div>
+      </div>
+      <div class="callout"><p><strong>Key fact about the whole codebase:</strong> the Platform shell (login, browsing, downloads, home screen) and the Core Simulation Runtime (the actual VR training experience) are two almost entirely separate programs sharing one Unity project. The only bridge is <code>SessionManager</code> ↔ <code>SimulationManager</code> — see Fig. 07. The Location system is completely disconnected (Fig. 08).</p></div>
+    </section>
+
+    <section class="plate" id="flow">
+      <div class="plate-head"><span class="plate-fig">FIG. 02</span><h2>Core runtime — simulation flow</h2></div>
+      <p class="lead">SimulationManager → SimulationState → Interactions.</p>
+      <div class="diagram-wrap">
+        <div class="diagram-canvas" id="canvas-flow"></div>
+        <div class="diagram-panel" id="panel-flow"><p class="panel-hint">Click a box or connection for details.</p></div>
+      </div>
+      <div class="callout"><p><strong>Step save-state (new):</strong> restart previously only reset each Interaction's internal flags — moved objects stayed moved. <code>StepStateComponent</code> (abstract <code>CaptureStepState()</code>/<code>RestoreStepState()</code>) is now implemented by <code>GrabInteraction</code>/<code>DetectInteraction</code> automatically, plus <code>SceneObjectSnapshot</code> (generic transform/enable/Animator undo for any prop) and <code>StepStateHook</code> (UnityEvent passthrough for any other script) via <code>SimulationState.extraStepStateHooks</code>. Two granularities reuse the same contract: <code>RestartCurrentState</code> restores the whole step's true top-of-step baseline; <code>RestartCurrentInteraction</code> restores only the currently-running interaction's own baseline (re-captured right before its turn), so it never undoes an earlier interaction's legitimate progress. Pause/Resume needed no changes — all grabbable objects use kinematic, no-gravity Rigidbodies with purely transform-driven movement, so <code>canInteract=false</code> already fully freezes the scene.</p></div>
+    </section>
+
+    <section class="plate" id="grab">
+      <div class="plate-head"><span class="plate-fig">FIG. 03</span><h2>Grab / Detect / Contamination / First Air / Hand-Speed</h2></div>
+      <div class="diagram-wrap">
+        <div class="diagram-canvas" id="canvas-grab"></div>
+        <div class="diagram-panel" id="panel-grab"><p class="panel-hint">Click a box or connection for details.</p></div>
+      </div>
+    </section>
+
+    <section class="plate" id="assist">
+      <div class="plate-head"><span class="plate-fig">FIG. 04</span><h2>Assistant / Bot / UI panel system</h2></div>
+      <div class="diagram-wrap">
+        <div class="diagram-canvas" id="canvas-assist"></div>
+        <div class="diagram-panel" id="panel-assist"><p class="panel-hint">Click a box or connection for details.</p></div>
+      </div>
+    </section>
+
+    <section class="plate" id="assess">
+      <div class="plate-head"><span class="plate-fig">FIG. 05</span><h2>Assessment &amp; scoring system</h2></div>
+      <div class="diagram-wrap">
+        <div class="diagram-canvas" id="canvas-assess"></div>
+        <div class="diagram-panel" id="panel-assess"><p class="panel-hint">Click a box or connection for details.</p></div>
+      </div>
+    </section>
+
+    <section class="plate" id="highlight">
+      <div class="plate-head"><span class="plate-fig">FIG. 06</span><h2>Grab highlight render pipeline (URP)</h2></div>
+      <div class="diagram-wrap">
+        <div class="diagram-canvas" id="canvas-highlight"></div>
+        <div class="diagram-panel" id="panel-highlight"><p class="panel-hint">Click a box or connection for details.</p></div>
+      </div>
+    </section>
+
+    <section class="plate" id="platform">
+      <div class="plate-head"><span class="plate-fig">FIG. 07</span><h2>Platform shell — login / downloads / home screen</h2></div>
+      <div class="diagram-wrap">
+        <div class="diagram-canvas" id="canvas-platform"></div>
+        <div class="diagram-panel" id="panel-platform"><p class="panel-hint">Click a box or connection for details.</p></div>
+      </div>
+    </section>
+
+    <section class="plate narrow" id="location">
+      <div class="plate-head"><span class="plate-fig">FIG. 08</span><h2>Location system (fully isolated)</h2></div>
+      <div class="diagram-wrap">
+        <div class="diagram-canvas" id="canvas-location"></div>
+        <div class="diagram-panel" id="panel-location"><p class="panel-hint">Click a box or connection for details.</p></div>
+      </div>
+      <div class="callout"><p>Project-wide search found <strong>zero references</strong> to LocationManager/LocationTag/LocationData outside <code>v2.0/Location/</code>.</p></div>
+    </section>
+
+    <section class="plate" id="singletons">
+      <div class="plate-head"><span class="plate-fig">FIG. 09</span><h2>Singleton inventory</h2></div>
+      <p class="lead">Every class exposing a static <code>Instance</code> access pattern, grouped by subsystem.</p>
+      <div class="frame">
+        <table>
+          <thead><tr><th>Subsystem</th><th>Singletons</th></tr></thead>
+          <tbody>
+            <tr><td>Core Runtime</td><td><code>SimulationManager</code>, <code>AssistantManager</code>, <code>ContaminationManager</code>*, <code>FirstAirManager</code>*</td></tr>
+            <tr><td>Assessment</td><td><code>AssessmentManager</code></td></tr>
+            <tr><td>Familiarization</td><td><code>PartsIdentificationManager</code></td></tr>
+            <tr><td>Shared services</td><td><code>SoundManager</code>, <code>HapticManager</code>, <code>TeleportManager</code>, <code>ScreenFade</code>, <code>ControllersToolTips</code>, <code>GrabManager</code></td></tr>
+            <tr><td>Platform (legacy)</td><td><code>GameManager</code>, <code>LoginManager</code>, <code>PlayerPrefsManager</code>, <code>SceneHandler</code>, <code>SimulationAssetLoader</code>, <code>SimulationDownloadManager</code>, <code>UIManager</code>, <code>Debugger</code>, <code>OVRScreenFade</code></td></tr>
+            <tr><td>Platform (v2.0)</td><td><code>AssetBundleManager</code>, <code>NewAPIManager</code>, <code>PlatformGameManager</code>, <code>ProgressBarManager</code></td></tr>
+            <tr><td>API</td><td><code>APIManager</code>**, <code>MessageHandleManager</code>, <code>SessionManager</code></td></tr>
+            <tr><td>Location</td><td><code>LocationManager</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <p>* <code>ContaminationManager</code> and <code>FirstAirManager</code> are scene-assigned Inspector fields (on AssistantManager and AssessmentManager), not a static Instance — included because both behave as a single per-scene authority in practice.</p>
+        <p>** Dead code — not actually called live anywhere.</p>
+      </div>
+    </section>
+
+    <section class="plate" id="reference">
+      <div class="plate-head"><span class="plate-fig">FIG. 10</span><h2>Full per-script reference</h2></div>
+      <p class="lead">All 144 scripts, one line each, organized by folder. Search filters every group live.</p>
+      <input class="search-box" id="refSearch" type="text" placeholder="Filter by script name, folder, or keyword…" autocomplete="off">
+      <div id="refRoot">
+
+        <div class="refgroup"><h3>v2.0/Simulation — orchestration core <span class="count">6 files</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>SimulationManager</dt><dd>Top-level state machine driving the list of SimulationStates, pause/resume, restart (step + interaction), mode selection (Guided/Assessment/FreeRoam). <span class="rel">Talks to: SimulationState, SessionManager, AssessmentManager, PartsIdentificationManager, SoundManager, Interactions.</span></dd></div>
+          <div><dt>SimulationState</dt><dd>One per training step; owns listOfInteractions + extraStepStateHooks, runs the sequence coroutine, drives prompts/teleport/assessment hooks, captures/restores step save-state. <span class="rel">Talks to: AssistantManager, AssessmentManager, TeleportManager, Interactions, StepStateComponent, DelayedEvent, SimulationManager.</span></dd></div>
+          <div><dt>GrabManager</dt><dd>Thin DontDestroyOnLoad singleton holding left/right GrabPinchDetector refs.</dd></div>
+          <div><dt>PreviewManager</dt><dd>Singleton; pauses sim and plays a context video based on current interaction type. <span class="rel">Talks to: SimulationManager, DetectInteraction, GrabInteraction, UIInteraction/IdleInteraction/GazeInteraction.</span></dd></div>
+          <div><dt>ContaminationManager</dt><dd>Per-zone contamination + hand-speed detection, simultaneous zones. See Fig. 03.</dd></div>
+          <div><dt>FirstAirManager</dt><dd>Per-zone first-air-break detection — architectural mirror of ContaminationManager, minus hand-speed. See Fig. 03.</dd></div>
+        </dl></div></div>
+
+        <div class="refgroup"><h3>v2.0/Simulation/StepState — step save-state <span class="count">3 files</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>StepStateComponent<span class="path">abstract</span></dt><dd>CaptureStepState()/RestoreStepState() contract shared by every step save-state hook.</dd></div>
+          <div><dt>SceneObjectSnapshot</dt><dd>Generic "put this scene object back" component — undoes enable/disable, transform/parent, and any Animator's parameters + exact per-layer state/time, in one component.</dd></div>
+          <div><dt>StepStateHook</dt><dd>UnityEvent passthrough (onCaptureStepState/onRestoreStepState) so any existing script can be made restart-safe from the Inspector with zero code changes.</dd></div>
+        </dl></div></div>
+
+        <div class="refgroup"><h3>v2.0/Interactions(Previously State) — interaction types <span class="count">6 files</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>Interactions<span class="path">abstract base</span></dt><dd><code>canInteract</code> property + <code>OnCanInteractChanged</code> hook, InteractionTimer, highlight/radial-UI plumbing, lifecycle (Start/Suspend/Complete/Reset), no-op CaptureStepState/RestoreStepState.</dd></div>
+          <div><dt>GrabInteraction</dt><dd>Offset-based grab (pinch or proximity), pose locking, reset-on-release, grab-collider mirrors canInteract; overrides CaptureStepState/RestoreStepState to snapshot/restore its own transform+parent. <span class="rel">Talks to: GrabPinchDetector, HandPoseLock/ControllerPoseLock, RecordedPose/BakedPose, ProximityGrabUI, GrabHighlightController, MoveToHelper, SoundManager.</span></dd></div>
+          <div><dt>DetectInteraction</dt><dd>Trigger-zone detection of one or more GrabInteraction objects, discard/dissolve on completion; overrides CaptureStepState/RestoreStepState to fan out to each detected object's own GrabInteraction. <span class="rel">Talks to: GrabInteraction, AssistantManager (BotDiscard), SoundManager, HapticManager.</span></dd></div>
+          <div><dt>GazeInteraction</dt><dd>SphereCast + proximity gated "look at object" interaction. <span class="rel">Talks to: SoundManager, HapticManager, RadialInteractionUI.</span></dd></div>
+          <div><dt>IdleInteraction</dt><dd>Timer-only or manual-advance interaction; no physical detection.</dd></div>
+          <div><dt>UIInteraction</dt><dd>Either a scene-authored panel/button or fully bot-handled via AssistantManager.TriggerBotUI. <span class="rel">Talks to: CustomButton, AssistantManager, PanelButtonController.</span></dd></div>
+        </dl></div></div>
+
+        <div class="refgroup"><h3>Contamination / First Air / hand-speed <span class="count">6 files</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>ContaminationManager</dt><dd>See Fig. 03 — per-zone lookup tables, owns VRHandSpeedTracker subscription.</dd></div>
+          <div><dt>ContaminationTrigger</dt><dd>Per-collider hand-contact timer; fires static <code>OnHandContactDetected</code>.</dd></div>
+          <div><dt>SpeedTrackingArea</dt><dd>Per-collider hand entry/exit; fires static <code>OnHandEnteredArea</code>/<code>OnHandExitedArea</code>/<code>OnTrackingDisabled</code>.</dd></div>
+          <div><dt>VRHandSpeedTracker</dt><dd>Independent left/right hand speed-violation tracking. <span class="rel">Talks to: SpeedTrackingArea (subscribes), ContaminationManager (fires events to).</span></dd></div>
+          <div><dt>FirstAirManager</dt><dd>See Fig. 03 — 1:1 architectural mirror of ContaminationManager's zone/trigger/threshold/UI model, minus hand-speed.</dd></div>
+          <div><dt>FirstAirTrigger</dt><dd>Per-collider hand-contact timer; fires static <code>OnHandContactDetected</code> (same shape as ContaminationTrigger).</dd></div>
+        </dl></div></div>
+
+        <div class="refgroup"><h3>v2.0/Assistant — bot &amp; UI panels <span class="count">5 files</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>AssistantManager</dt><dd>Panel state machine (Prompt/BotUI/Help/BotFollowMe/Assist), contamination/hand-speed overlays, dissolve/discard flow. See Fig. 04.</dd></div>
+          <div><dt>BotController</dt><dd>Bot FSM: follow player, face user, VR-button summon/dismiss, animator + sound stings. <span class="rel">Talks to: SoundManager, SimulationManager, BotGuideBehaviour.</span></dd></div>
+          <div><dt>DissolveController</dt><dd>Swaps renderers to a dissolve shader and animates <code>_DissolveAmount</code>; driven by AssistantManager's discard flow.</dd></div>
+          <div><dt>PromptInteraction<span class="path">Assistant Interactions/</span></dt><dd>Legacy standalone prompt panel setter, not part of the state-driven flow.</dd></div>
+          <div><dt>Progress<span class="path">Assistant Interactions/</span></dt><dd>One progress-bar slider+text component, driven by AssistantManager.</dd></div>
+        </dl></div></div>
+
+        <div class="refgroup"><h3>Bot guidance &amp; grab plumbing <span class="count">12 files</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>BotGuideBehaviour<span class="path">Controllers/</span></dt><dd>Coroutine FSM leading the player along a computed path; fires static <code>GuideFinished</code>. <span class="rel">Talks to: GridPathfinder, BotController.</span></dd></div>
+          <div><dt>GridPathFinder / FloorGridGizmo / GridPathFinderEditor<span class="path">Remap/</span></dt><dd>Grid-based pathfinding backing BotGuideBehaviour.</dd></div>
+          <div><dt>GrabPinchDetector<span class="path">Remap/</span></dt><dd>Per-hand pinch/grip detection, overlap-sphere grab search, toggle vs. legacy trigger mechanism. <span class="rel">Talks to: GrabInteraction, HandPoseLock/ControllerPoseLock.</span></dd></div>
+          <div><dt>GrabPoseDiagnostics<span class="path">Remap/</span></dt><dd>Debug tool to inspect/manually lock pose slots without grabbing.</dd></div>
+          <div><dt>HandPoseLock / ControllerPoseLock<span class="path">Remap/</span></dt><dd>Lock hand/controller pose during a grab.</dd></div>
+          <div><dt>RecordedPose / BakedPose / PoseRef<span class="path">Remap/</span></dt><dd>Pose data assets used by GrabInteraction's four pose slots.</dd></div>
+          <div><dt>GrabPoseRecorderWindow<span class="path">Remap/</span></dt><dd>Editor tool to record poses into RecordedPose assets.</dd></div>
+          <div><dt>ProximityGrabUI<span class="path">Remap/</span></dt><dd>World-space radial-fill timer UI, driven by GrabInteraction's proximity-grab coroutine.</dd></div>
+          <div><dt>PathResampler<span class="path">Remap/</span></dt><dd>Static polyline resampling utility (pure math, no project deps).</dd></div>
+          <div><dt>RippleEffect<span class="path">Remap/</span></dt><dd>UI ripple shader driver, used by CustomButton.</dd></div>
+          <div><dt>ControllerTooltipController<span class="path">Remap/ControllerTooltipManager.cs</span></dt><dd>Swaps hand/controller visual models, animates tooltip prefabs.</dd></div>
+          <div><dt>MoveToHelper<span class="path">Remap/</span></dt><dd>Generic transform mover (snap/lerp/parent-change/head-anchor-follow). <span class="rel">Talks to: GrabInteraction, SimulationManager.</span></dd></div>
+        </dl></div></div>
+
+        <div class="refgroup"><h3>v2.0/Utility — shared services &amp; misc <span class="count">27 files</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>Timer</dt><dd>Coroutine-based wait/tick timer. Hosted by Interactions and CustomButton.</dd></div>
+          <div><dt>CustomButton</dt><dd>Touch-based VR hold-button, hosts its own Timer instance.</dd></div>
+          <div><dt>PanelButtonController</dt><dd>Enables/disables a panel's clickable colliders during pop animations.</dd></div>
+          <div><dt>RadialInteractionUI</dt><dd>Generic radial-fill progress UI used by Grab/Detect/Gaze interactions.</dd></div>
+          <div><dt>AlertEffect</dt><dd>Static <code>AlertStarted</code>/<code>AlertFinished</code> screen-vignette effect, consumed by AssistantManager's contamination/hand-speed flow.</dd></div>
+          <div><dt>TeleportManager</dt><dd>Singleton; player + object teleport via ScreenFade, fires static <code>TeleportStarted</code>/<code>TeleportCompleted</code>.</dd></div>
+          <div><dt>AnimatorBooleanController / ControllerHandAnimationManager / InterpolateAnimation</dt><dd>Thin Animator-parameter drivers, no project-class deps.</dd></div>
+          <div><dt>ControllersToolTips</dt><dd>Gaze-based controller tooltip visibility, singleton + static event.</dd></div>
+          <div><dt>ObjectMovementHelper</dt><dd>Async cancellable move-to-position helper (uses ExtensionMethods).</dd></div>
+          <div><dt>SceneRevealController</dt><dd>Global dissolve-reveal shader driver for scene transitions.</dd></div>
+          <div><dt>FollowTransform</dt><dd>Simple follow/billboard component, no project deps.</dd></div>
+          <div><dt>UniformScaleCompensator</dt><dd>Editor-only counter-scale utility.</dd></div>
+          <div><dt>bypassScript</dt><dd>Module/simulation ID gating for hiding UI cards (mostly commented-out code, one live Platform.Card reference).</dd></div>
+          <div><dt>DelayedEventActions</dt><dd>Fires DelayedEvents by index, branching on <code>SimulationManager.simulationMode</code>.</dd></div>
+          <div><dt>GrabHighlightController / GrabHighlightExclude / GrabHighlightRegistry / GrabHighlightPass / GrabHighlightFeature<span class="path">Renderer feature/</span></dt><dd>See Fig. 06.</dd></div>
+          <div><dt>FlyCamera<span class="path">FrostedUI/</span></dt><dd>Free-fly debug camera, self-contained.</dd></div>
+          <div><dt>FrostedGlassCamera<span class="path">FrostedUI/</span></dt><dd>Blurred-scene-copy provider for frosted-glass UI materials, self-contained.</dd></div>
+          <div><dt>ColorRole / UIThemeAsset / ThemedImage / ThemedText<span class="path">UI Theme System/</span></dt><dd>Semantic-color theming system for UI Image/Text components; UIThemeAssetEditor can apply a theme scene-wide.</dd></div>
+          <div><dt>DynamicLookAt / TestSteps</dt><dd>Present in the project but not read in detail this pass — flagged rather than guessed.</dd></div>
+        </dl></div></div>
+
+        <div class="refgroup"><h3>Remap/SoundManager.cs, Remap/HapticManager.cs <span class="count">2 files</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>SoundManager</dt><dd>Static-facing singleton; ~30 passthrough SFX methods used throughout Grab/Detect/Gaze/Bot/Contamination/UI. <span class="rel">Talks to: HapticManager (most SFX calls also fire a matching haptic).</span></dd></div>
+          <div><dt>HapticManager</dt><dd>Static-facing singleton; XR controller haptics incl. curve-driven "ticking" haptics for gaze/detect holds, routes through Unity XR Toolkit's HapticImpulsePlayer.</dd></div>
+        </dl></div></div>
+
+        <div class="refgroup"><h3>v2.0/Extensions <span class="count">3 files</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>ExtensionMethods</dt><dd>Static tween/animation library (DoMove, DoScale, DoFade, DoPunch*, DoShake*, DoBezier, etc.); also defines MyTransform/TransformContainer.</dd></div>
+          <div><dt>ScreenFade</dt><dd>Singleton sphere-based screen fade + message overlay, used by TeleportManager.</dd></div>
+          <div><dt>DelayedEvent</dt><dd>Serializable UnityEvent+delay wrapper, used by SimulationState and DelayedEventActions.</dd></div>
+        </dl></div></div>
+
+        <div class="refgroup"><h3>v2.0/Interfaces <span class="count">3 files</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>gaze</dt><dd>Empty stub MonoBehaviour, no logic.</dd></div>
+          <div><dt>IDetect</dt><dd>Empty marker interface (implemented by DetectInteraction, GazeInteraction).</dd></div>
+          <div><dt>IGrab</dt><dd>Empty marker interface (implemented by GrabInteraction).</dd></div>
+        </dl></div></div>
+
+        <div class="refgroup"><h3>v2.0/Assessment <span class="count">6 files</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>AssessmentManager</dt><dd>See Fig. 05. Now also holds ContaminationManager/FirstAirManager refs + central contaminationPenalty/firstAirPenalty/fastHandPenalty fields.</dd></div>
+          <div><dt>AssessmentController</dt><dd>Sibling component on each SimulationState GameObject; pure config (interactionConfigs, max/final score). Now also holds the contaminationAssessed/firstAirAssessed/fastHandAssessed checkboxes, the compulsory-1-mark RecalculateInteractionShares() split, and the contaminationMessage/firstAirMessage/hintTakenMessage API fields.</dd></div>
+          <div><dt>AssessmentControllerEditor</dt><dd>Custom inspector for AssessmentController.</dd></div>
+          <div><dt>AssessmentReportClasses</dt><dd>Serializable DTOs for an external reporting/auth API.</dd></div>
+          <div><dt>DetectAssessment</dt><dd>Older per-interaction assessment path not wired into AssessmentManager's runtime flow.</dd></div>
+          <div><dt>IAssessment</dt><dd>Interface implemented by DetectAssessment.</dd></div>
+        </dl></div></div>
+
+        <div class="refgroup"><h3>Simulation Familiarization/<span class="path">outside v2.0 — Free Roam / Guided parts-ID flow</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>PartsIdentificationManager</dt><dd>Singleton; drives per-part highlight/UI/station flow, intercepts SimulationManager.NotifyStateComplete in FreeRoam mode. <span class="rel">Talks to: SimulationManager, SimulationState (via PartStepData), FamiliarizationUIPanel, GrabHighlightController, StationIButton, AssistantManager, CustomButton.</span></dd></div>
+        </dl></div>
+        <p style="font-size:13px;color:var(--ink-faint);margin-top:10px;">FamiliarizationUIPanel, FamiliarizationVideoPanel, PartStepData, and StationIButton live in this same sibling folder — referenced but not surveyed script-by-script here.</p></div>
+
+        <div class="refgroup"><h3>v2.0/Editor — editor-only tooling <span class="count">15 files</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>ContaminationManagerEditor</dt><dd>Bulk-attach ContaminationTrigger/SpeedTrackingArea buttons.</dd></div>
+          <div><dt>FirstAirManagerEditor</dt><dd>Bulk-attach FirstAirTrigger to all zone colliders button (mirrors ContaminationManagerEditor, minus the speed-tracking button).</dd></div>
+          <div><dt>DetectInteractionBuilderWindow / InteractionBuilderWindow</dt><dd>Scene-building wizards for Detect/Gaze/Grab interaction GameObjects.</dd></div>
+          <div><dt>SimulationStateEditor</dt><dd>Custom inspector for SimulationState with per-interaction-type fields.</dd></div>
+          <div><dt>AssessmentWizard</dt><dd>Bulk-assign/remove AssessmentController on SimulationState objects.</dd></div>
+          <div><dt>SimulationPromptExtractor</dt><dd>Dumps all state prompt text to a .txt file.</dd></div>
+          <div><dt>MissingMaterialFixerWindow</dt><dd>Finds/fixes meshes with missing materials.</dd></div>
+          <div><dt>SimulationStepWizard / TTSAudioGeneratorWindow / TTSAudioGeneratorWindow_cs / DetectInteractionEditor / ProjectNotesWindow</dt><dd>Additional editor tooling, not surveyed in full detail this pass.</dd></div>
+          <div><dt>FindMetaQuestAssets / FixMetaQuestFeature</dt><dd>OpenXR/Meta Quest project-settings utilities, no project-class deps.</dd></div>
+        </dl></div></div>
+
+        <div class="refgroup"><h3>v2.0/Location <span class="count">6 files</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>LocationManager / LocationTag / LocationData</dt><dd>See Fig. 08 — fully isolated subsystem.</dd></div>
+          <div><dt>LocationBrowserWindow / LocationManagerEditor / LocationTagEditor</dt><dd>Editor windows/inspectors for the above.</dd></div>
+        </dl></div></div>
+
+        <div class="refgroup"><h3>v2.0/API, v2.0/Platform, Platform/ <span class="count">41 files</span></h3>
+        <div class="frame"><dl class="reflist">
+          <div><dt>v2.0/API</dt><dd>SessionManager, MessageHandleManager, APIManager (dead), APICollections (dead).</dd></div>
+          <div><dt>v2.0/Platform/NewAPI</dt><dd>ContentManager, NewAPIManager, NewAPICollections, PlatformGameManager, DeviceManager, NewLoginManager, AssetBundleManager, ProgressBarManager, DataContainer, LeaderBoardCard, ProgressDataContainer.</dd></div>
+          <div><dt>v2.0/Platform</dt><dd>KeyboardManager, UIAnimationHandler.</dd></div>
+          <div><dt>Platform/<span class="path">legacy v1</span></dt><dd>GameManager, LoginManager, PopulateModules, PopulateSimulations, SceneHandler, SimulationAssetLoader, SimulationDownloadManager, SimulationDownloader, SimulationDownloadProgress, SimulationDetails, UIManager, APICollection, APIHelper, MD5Generator, PlayerPrefsManager, Card, Debugger, OVRScreenFade, UtilityScript, HintVRControls.</dd></div>
+        </dl></div></div>
+
+      </div>
+    </section>
+
+    <section class="plate narrow" id="dead">
+      <div class="plate-head"><span class="plate-fig">FIG. 11</span><h2>Known dead code &amp; orphaned systems</h2></div>
+      <ul class="deadlist">
+        <li><code>v2.0/API/APIManager.cs</code> + <code>APICollections.cs</code> — fully superseded by NewAPIManager/NewAPICollections, not called live anywhere.</li>
+        <li><code>v2.0/Assessment/Assessment Types/DetectAssessment.cs</code> — older per-interaction assessment path not wired into AssessmentManager's actual runtime flow.</li>
+        <li><code>v2.0/Location/*</code> — entire subsystem has zero incoming references from the rest of the project.</li>
+        <li><code>Platform/</code> (legacy v1 stack) vs <code>v2.0/Platform/NewAPI/</code> — two parallel implementations of the same login/browse/download flow; worth confirming which one the shipped scene(s) actually use.</li>
+        <li><code>bypassScript.cs</code> — mostly commented-out logic with one live reference remaining.</li>
+      </ul>
+    </section>
+
+    <footer class="end">Simulation System v2.1.17 · self-contained reference · open locally, no server required</footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================= THEME ============================= */
+  var saved = null;
+  try { saved = localStorage.getItem('sysarch-theme'); } catch(e) {}
+  if (saved === 'dark' || saved === 'light') document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('themeToggle').addEventListener('click', function(){
+    var cur = document.documentElement.getAttribute('data-theme');
+    if (!cur) cur = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    var next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('sysarch-theme', next); } catch(e) {}
+  });
+
+  /* ============================= DIAGRAM DATA ============================= */
+  var DIAGRAMS = {
+
+    map: { title: "Top-level module map", nodes: [
+      { id:"CORE", label:"Core Simulation Runtime", col:2, row:0, tags:["core"], desc:"SimulationManager, SimulationState, and the five Interaction types (Grab/Detect/Gaze/Idle/UI). The actual step-by-step VR training engine — everything else in the project exists to support this. See Fig. 02." },
+      { id:"CONTAM", label:"Contamination, First Air & Hand-Speed", col:0, row:1, tags:["core"], desc:"ContaminationManager, VRHandSpeedTracker, ContaminationTrigger, SpeedTrackingArea, FirstAirManager, FirstAirTrigger. Detects unsafe hand contact/speed and first-air breaks per-zone, every zone simultaneous and independent. See Fig. 03." },
+      { id:"ASSIST", label:"Assistant / Bot / UI Panels", col:2, row:1, desc:"AssistantManager, BotController, BotGuideBehaviour, AlertEffect. Owns every on-screen panel, the floating bot companion, and its guidance behavior. See Fig. 04." },
+      { id:"ASSESS", label:"Assessment & Scoring", col:4, row:1, desc:"AssessmentManager, AssessmentController, DetectAssessment. Scores Guided/Assessment-mode runs. See Fig. 05." },
+      { id:"FAMIL", label:"Parts Familiarization", col:1, row:2, desc:"PartsIdentificationManager and friends, living outside v2.0/ in a sibling 'Simulation Familiarization' folder. Drives the Free Roam / Guided parts-ID flow." },
+      { id:"HILITE", label:"Grab Highlight Pipeline", col:3, row:2, desc:"GrabHighlightController → Registry → Pass → Feature. A URP render-feature that outlines grabbable objects. See Fig. 06." },
+      { id:"SVC", label:"Shared Services", col:2, row:3, desc:"SoundManager, HapticManager, TeleportManager, Timer, ExtensionMethods. Static-facing utilities called from nearly everywhere." },
+      { id:"PLATFORM", label:"Platform Shell", col:0, row:4, tags:["warn"], desc:"Login, module/simulation browsing, downloads, home screen. Almost an entirely separate program sharing this Unity project. See Fig. 07." },
+      { id:"LOC", label:"Location System", col:4, row:4, tags:["dead"], desc:"LocationManager/Tag/Data. Confirmed fully isolated — zero references from anywhere else in the project. See Fig. 08." }
+    ], edges: [
+      { from:"CORE", to:"CONTAM", kind:"calls", desc:"Owns the active state's Interactions list; the contamination system hooks in independently of the state machine, not through it." },
+      { from:"CORE", to:"ASSIST", kind:"calls", desc:"SimulationState calls AssistantManager for every prompt/UI beat (EvaluateStateInteractions, SetProgressFromSimulation)." },
+      { from:"CORE", to:"ASSESS", kind:"calls", desc:"SimulationManager/SimulationState notify AssessmentManager at session/state/interaction boundaries." },
+      { from:"CORE", to:"FAMIL", kind:"calls", desc:"SimulationManager.NotifyStateComplete lets PartsIdentificationManager intercept the advance in FreeRoam mode." },
+      { from:"CONTAM", to:"ASSIST", kind:"event", desc:"ContaminationManager fires per-zone triggered/resolved events that AssistantManager pops UI panels for." },
+      { from:"ASSIST", to:"SVC", kind:"calls", desc:"Every panel pop, bot bark, and haptic tick routes through SoundManager / HapticManager / TeleportManager." },
+      { from:"ASSIST", to:"HILITE", kind:"calls", desc:"GrabInteraction (reached via the state machine) and PartsIdentificationManager both drive GrabHighlightController directly." },
+      { from:"ASSESS", to:"CORE", kind:"calls", desc:"Reads SimulationManager.simulationMode / currentState directly to gate assessment-mode logic." },
+      { from:"ASSESS", to:"ASSIST", kind:"calls", desc:"Calls AssistantManager.ShowHintPrompt() when the hint button is used, and again on a Contamination/First Air trigger (same prompt+highlight reveal)." },
+      { from:"CONTAM", to:"ASSESS", kind:"event", desc:"ContaminationManager/FirstAirManager triggered events now also feed AssessmentManager directly, which deducts a centrally-configured penalty from the currently active step if that step's AssessmentController has the matching checkbox on." },
+      { from:"FAMIL", to:"CORE", kind:"calls", desc:"Reads/writes SimulationManager.currentState / states, calls MoveToState directly." },
+      { from:"FAMIL", to:"ASSIST", kind:"event", desc:"Subscribes to AssistantManager's static PromptCompleted event." },
+      { from:"FAMIL", to:"HILITE", kind:"calls", desc:"Calls GrabHighlightController.ShowHighlight / HideHighlight directly for part call-outs." },
+      { from:"CORE", to:"SVC", kind:"calls", desc:"SoundManager.PlaySimulationStart/End and similar direct calls from SimulationManager." },
+      { from:"PLATFORM", to:"CORE", kind:"event", desc:"SessionManager (Platform) and SimulationManager (Core) call each other directly — the ONLY bridge between the two halves of the project. See Fig. 07." },
+      { from:"LOC", to:"CORE", kind:"none", desc:"No connection found anywhere in the codebase. LocationManager/Tag/Data are a fully orphaned subsystem — nothing references them and they reference nothing outside their own folder." }
+    ]},
+
+    flow: { title: "Simulation flow", nodes: [
+      { id:"SESS", label:"SessionManager", col:0, row:0, tags:["singleton"], desc:"Manages the simulation session lifecycle (create/update/end) and elapsed-time tracking, called by SimulationManager. Lives in v2.0/API." },
+      { id:"SM", label:"SimulationManager", col:2, row:0, tags:["singleton","core"], desc:"Top-level state machine. Owns the states list, drives MoveToState/NotifyStateComplete, snapshots canInteract across every Interactions during Pause/Resume, and now restores (not re-captures) step save-state on RestartCurrentState/RestartCurrentInteraction." },
+      { id:"SND", label:"SoundManager", col:4, row:0, tags:["singleton"], desc:"Static-facing singleton SFX service — PlaySimulationStart/End called directly by SimulationManager." },
+      { id:"ASM", label:"AssessmentManager", col:0, row:1, tags:["singleton"], desc:"Owns all assessment/scoring logic. BeginSession/CloseSession called by SimulationManager; BeginState/OnInteractionStarted/OnInteractionCompleted/CloseState called by SimulationState." },
+      { id:"SS", label:"SimulationState", col:2, row:1, tags:["core"], desc:"One per training step. RunSequence() is a coroutine that walks listOfInteractions in order, waiting on HasInteractionEnded() between each. Captures a step-level save-state baseline once at the true top of the step, and re-captures a per-interaction baseline right before each interaction's own turn — CaptureStepState()/RestoreStepState() on every Interactions + extraStepStateHooks entry." },
+      { id:"AM", label:"AssistantManager", col:4, row:1, tags:["singleton"], desc:"Called by SimulationState for EvaluateStateInteractions and SetProgressFromSimulation on every state start." },
+      { id:"PIM", label:"PartsIdentificationManager", col:0, row:2, tags:["singleton"], desc:"Singleton in the sibling 'Simulation Familiarization' folder. SimulationManager.NotifyStateComplete calls TryInterceptStateComplete — FreeRoam mode only — letting it hijack MoveToState." },
+      { id:"INT", label:"Interactions (abstract base)", col:2, row:2, tags:["core"], desc:"canInteract property + OnCanInteractChanged hook, InteractionTimer, highlight/radial-UI plumbing, lifecycle (Start/Suspend/Complete/Reset). Base class of all five interaction types." },
+      { id:"TP", label:"TeleportManager", col:4, row:2, tags:["singleton"], desc:"Singleton; teleports the player via ScreenFade. SimulationState subscribes to its static TeleportStarted/TeleportCompleted events for teleport-on-start steps." },
+      { id:"GI", label:"GrabInteraction", col:0, row:3, desc:"Offset-based grab (pinch or proximity). See Fig. 03 for its full connection map." },
+      { id:"DI", label:"DetectInteraction", col:1, row:3, desc:"Trigger-zone detection of GrabInteraction objects. See Fig. 03." },
+      { id:"GZ", label:"GazeInteraction", col:2, row:3, desc:"SphereCast + proximity gated 'look at object' interaction. Two-gate system: proximity radius, then gaze direction." },
+      { id:"ID", label:"IdleInteraction", col:3, row:3, desc:"Timer-only or manual-advance interaction — no physical detection at all." },
+      { id:"UI", label:"UIInteraction", col:4, row:3, desc:"Either a scene-authored panel/button, or fully bot-handled via AssistantManager.TriggerBotUI when no scene UI is assigned." },
+      { id:"TIMER", label:"Timer", col:2, row:4, tags:["core"], desc:"Coroutine-based wait/tick timer, hosted on whichever Interactions (or CustomButton) instance owns it. Rewritten this session — previously async void + Task.Yield(), which raced against physics trigger callbacks and could leave the timer permanently stuck 'running' after a last-second interrupt." }
+    ], edges: [
+      { from:"SM", to:"SS", kind:"owns", desc:"SimulationManager owns the ordered states list and activates/deactivates each SimulationState's GameObject via MoveToState." },
+      { from:"SS", to:"INT", kind:"calls", desc:"StartInteraction / StopInteraction / ResetInteraction / HasInteractionEnded() — SimulationState's RunSequence coroutine drives every interaction through its full lifecycle in order." },
+      { from:"INT", to:"GI", kind:"owns", desc:"GrabInteraction extends Interactions." },
+      { from:"INT", to:"DI", kind:"owns", desc:"DetectInteraction extends Interactions." },
+      { from:"INT", to:"GZ", kind:"owns", desc:"GazeInteraction extends Interactions." },
+      { from:"INT", to:"ID", kind:"owns", desc:"IdleInteraction extends Interactions." },
+      { from:"INT", to:"UI", kind:"owns", desc:"UIInteraction extends Interactions." },
+      { from:"INT", to:"TIMER", kind:"owns", desc:"Every Interactions instance hosts one Timer (InteractionTimer) whose wait-loop runs as a coroutine on that instance." },
+      { from:"SS", to:"AM", kind:"calls", desc:"EvaluateStateInteractions (handles prompt audio + panel selection) and SetProgressFromSimulation (updates the progress bar) — called once per state start." },
+      { from:"SS", to:"ASM", kind:"calls", desc:"BeginState / OnInteractionStarted / OnInteractionCompleted / CloseState — fired at each lifecycle boundary so AssessmentManager can track scoring." },
+      { from:"SS", to:"TP", kind:"event", desc:"Subscribes to TeleportManager's static TeleportStarted/TeleportCompleted events when a step has teleportOnStart enabled." },
+      { from:"SM", to:"INT", kind:"calls", desc:"PauseSimulation/ResumeSimulation snapshot and restore canInteract across every Interactions in the current state — a blunt, whole-state pause." },
+      { from:"SM", to:"ASM", kind:"calls", desc:"BeginSession (on simulation start) and CloseSession (on simulation end)." },
+      { from:"SM", to:"SESS", kind:"calls", desc:"CreateSession, UpdateSession, EndSession, GetElapsedTime, ResetElapsedTime — the full session-logging lifecycle." },
+      { from:"SESS", to:"SM", kind:"calls", desc:"AssignStepSessionID and reads/toggles setModeUI — a genuine two-way coupling, not just SimulationManager calling out." },
+      { from:"SM", to:"PIM", kind:"calls", desc:"TryInterceptStateComplete(completedIndex) — FreeRoam mode only; returning true lets PartsIdentificationManager redirect the flow instead of the normal MoveToNextState." },
+      { from:"PIM", to:"SM", kind:"calls", desc:"MoveToState, plus reads currentState/states to drive the parts-familiarization station flow." },
+      { from:"SM", to:"SND", kind:"calls", desc:"PlaySimulationStart() and PlaySimulationEnd()." }
+    ]},
+
+    grab: { title: "Grab / Detect / Contamination / Hand-Speed", nodes: [
+      { id:"GM", label:"GrabManager", col:0, row:0, tags:["singleton"], desc:"Thin DontDestroyOnLoad singleton holding left/right GrabPinchDetector references for other scripts to pull from." },
+      { id:"GPD", label:"GrabPinchDetector", col:1, row:0, desc:"One per hand. Detects pinch/grip via Input Actions, overlap-sphere searches for the nearest grabbable, and calls TryGrabFrom." },
+      { id:"HPL", label:"HandPoseLock / ControllerPoseLock", col:1, row:1, desc:"Locks the hand or controller pose (fingers snap to recorded positions) for the duration of a grab." },
+      { id:"RP", label:"RecordedPose / BakedPose", col:1, row:2, desc:"Pose data assets (IPoseSource) feeding GrabInteraction's four pose slots: hand-left, hand-right, controller-left, controller-right." },
+      { id:"GI", label:"GrabInteraction", col:2, row:0, tags:["core"], desc:"Offset-based grab via pinch or proximity, pose locking, reset-on-release. Its grab Collider now mirrors canInteract exactly, fixed this session." },
+      { id:"PGU", label:"ProximityGrabUI", col:2, row:1, desc:"World-space radial-fill timer UI shown while a hand waits inside a GrabWithoutPinch object's trigger before the grab fires." },
+      { id:"GHC", label:"GrabHighlightController", col:2, row:2, desc:"Per-object outline controller — fades highlight amount and swaps the GameObject's layer to 'Grabbable'. See Fig. 06." },
+      { id:"AM", label:"AssistantManager", col:2, row:3, tags:["singleton"], desc:"Receives per-zone contamination and hand-speed events from ContaminationManager and pops the corresponding zone's UI panel. See Fig. 04." },
+      { id:"DI", label:"DetectInteraction", col:3, row:0, desc:"Trigger-zone detection of one or more GrabInteraction objects; handles discard/dissolve once detection completes." },
+      { id:"MTH", label:"MoveToHelper", col:3, row:1, desc:"Generic transform mover — snap, smoothed lerp, parent-change, continuous sync-to-target, or head-anchor following." },
+      { id:"DC", label:"DissolveController", col:3, row:2, desc:"Swaps renderers to a dissolve shader and animates _DissolveAmount for the discard-with-dissolve visual path." },
+      { id:"CM", label:"ContaminationManager", col:4, row:0, tags:["singleton","core"], desc:"Rebuilt this session: the old single-active-zone model (driven by a SetActiveZone() call that was never invoked anywhere) is gone. Every zone now monitors its own colliders/speed-area simultaneously, each with its own uiPanel and handSpeedUIPanel." },
+      { id:"CT", label:"ContaminationTrigger", col:4, row:1, desc:"Attached per-collider. Times how long a hand stays in contact, then fires the static OnHandContactDetected event." },
+      { id:"STA", label:"SpeedTrackingArea", col:4, row:2, desc:"Attached per-collider. Fires static OnHandEnteredArea / OnHandExitedArea / OnTrackingDisabled as hands cross the boundary." },
+      { id:"VRT", label:"VRHandSpeedTracker", col:4, row:3, tags:["core"], desc:"Rewritten this session so left and right hands are tracked as fully independent state — two different zones can now show hand-speed violations at the same time instead of one hand blocking the other's detection." },
+      { id:"FAM", label:"FirstAirManager", col:5, row:0, tags:["singleton","core"], desc:"A deliberate 1:1 architectural mirror of ContaminationManager for tracking first-air breaks (unobstructed path to a critical site blocked by a hand) — same zone/trigger/threshold/UI model, minus the hand-speed sub-system. Fully independent of ContaminationManager: any number of Contamination and First Air zones can trigger at the same time." },
+      { id:"FAT", label:"FirstAirTrigger", col:5, row:1, desc:"Attached per-collider. Same shape as ContaminationTrigger — times hand contact, then fires the static OnHandContactDetected event." }
+    ], edges: [
+      { from:"GM", to:"GPD", kind:"owns", desc:"Holds the scene references to the left- and right-hand GrabPinchDetector instances." },
+      { from:"GPD", to:"GI", kind:"calls", desc:"TryGrabFrom() fires the actual grab. Also explicitly skips any GrabInteraction whose canInteract is false — added this session as defense-in-depth on top of the collider itself being disabled." },
+      { from:"GPD", to:"HPL", kind:"calls", desc:"Reads HandPoseLock/ControllerPoseLock to resolve the tracking root and lock the hand/controller pose during a grab." },
+      { from:"GI", to:"HPL", kind:"calls", desc:"Locks the recorded pose on grab, unlocks it on release." },
+      { from:"GI", to:"RP", kind:"calls", desc:"Resolves the correct RecordedPose/BakedPose for the current input mode + handedness." },
+      { from:"GI", to:"PGU", kind:"owns", desc:"Instantiates and drives the proximity-grab radial-fill timer UI (pop-in, progress, pop-out)." },
+      { from:"GI", to:"GHC", kind:"owns", desc:"Calls ShowHighlight()/HideHighlight() to fade the grab outline in and out." },
+      { from:"GI", to:"MTH", kind:"event", desc:"MoveToHelper subscribes to onGrabbed/onReleased so it can follow or release the object." },
+      { from:"DI", to:"GI", kind:"calls", desc:"ForceReleaseSuppressReset, StopInteraction, ResetObjectAfterDetect, and a direct canInteract swap on the objects it's tracking for detection." },
+      { from:"DI", to:"DC", kind:"calls", desc:"Hands the detected object off to DissolveController for the dissolve-on-discard visual path." },
+      { from:"DI", to:"MTH", kind:"calls", desc:"TeleportObjectToDetect calls MoveToHelper directly on the target object." },
+      { from:"CT", to:"CM", kind:"event", desc:"Static OnHandContactDetected, fired once a hand has stayed inside a contamination collider past the contact threshold." },
+      { from:"STA", to:"VRT", kind:"event", desc:"Static OnHandEnteredArea / OnHandExitedArea — VRHandSpeedTracker listens to build its per-hand state (area, threshold, tracked flag)." },
+      { from:"VRT", to:"CM", kind:"event", desc:"OnSpeedViolationDetected / OnSpeedViolationResolved, each carrying the specific SpeedTrackingArea involved so ContaminationManager can resolve which zone it belongs to." },
+      { from:"CM", to:"STA", kind:"calls", desc:"EnableAllSpeedTrackingAreas() plus Collider→Zone and Area→Zone lookup tables built in Awake — every zone is monitored simultaneously now, not just one 'active' zone." },
+      { from:"CM", to:"AM", kind:"event", desc:"onContaminationTriggered/Resolved and onSpeedViolationTriggered/Resolved, each carrying the specific zone's uiPanel/handSpeedUIPanel so multiple zones can show concurrently without interrupting each other." },
+      { from:"FAT", to:"FAM", kind:"event", desc:"Static OnHandContactDetected, fired once a hand has stayed inside a first-air collider past the contact threshold." },
+      { from:"FAM", to:"AM", kind:"event", desc:"onFirstAirTriggered/Resolved, each carrying the specific zone's uiPanel — wired into AssistantManager identically to ContaminationManager (own tracked panel set, pause/restart reference-counting)." }
+    ]},
+
+    assist: { title: "Assistant / Bot / UI panel system", nodes: [
+      { id:"BGB", label:"BotGuideBehaviour", col:0, row:0, desc:"Coroutine FSM leading the player along a computed path while respecting a lead-distance constraint. Fires static GuideFinished when done." },
+      { id:"BC", label:"BotController", col:2, row:0, desc:"The bot's FSM/movement controller — follows the player, faces the user, handles VR-button summon/dismiss, drives the Animator, plays a sound sting for every state transition." },
+      { id:"SND", label:"SoundManager", col:4, row:0, tags:["singleton"], desc:"Static-facing SFX singleton — ~30 passthrough play methods called from nearly everywhere." },
+      { id:"GPF", label:"GridPathfinder", col:0, row:1, desc:"Grid-based pathfinding used by BotGuideBehaviour to compute the world-space lead path." },
+      { id:"AM", label:"AssistantManager", col:2, row:1, tags:["singleton","core"], desc:"The panel state machine — Prompt/BotUI/Help/BotFollowMe/Assist — plus, rebuilt this session, fully concurrent per-zone contamination and hand-speed overlays that no longer interrupt or stash the main panel flow." },
+      { id:"HAP", label:"HapticManager", col:4, row:1, tags:["singleton"], desc:"XR controller haptics singleton, including curve-driven 'ticking' haptics for gaze/detect holds." },
+      { id:"CM", label:"ContaminationManager", col:0, row:2, tags:["singleton"], desc:"Fires per-zone triggered/resolved events for both contamination and hand-speed. See Fig. 03." },
+      { id:"FAM", label:"FirstAirManager", col:1, row:0, tags:["singleton"], desc:"Fires per-zone onFirstAirTriggered/Resolved events, handled identically to ContaminationManager's — own tracked panel set, pause/restart reference-counting, TMP atlas warm-up. See Fig. 03." },
+      { id:"PBC", label:"PanelButtonController", col:1, row:2, desc:"Enables/disables a panel's clickable colliders during pop-in/pop-out animations, so buttons can't be hit mid-transition." },
+      { id:"DC", label:"DissolveController", col:3, row:2, desc:"Dissolve shader driver used by AssistantManager's discard flow." },
+      { id:"ALE", label:"AlertEffect", col:4, row:2, desc:"Static AlertStarted/AlertFinished events drive a full-screen vignette + audio during contamination/hand-speed alerts." },
+      { id:"ASM", label:"AssessmentManager", col:0, row:3, tags:["singleton"], desc:"Calls AssistantManager.ShowHintPrompt when the hint button is used. See Fig. 05." },
+      { id:"TP", label:"TeleportManager", col:2, row:3, tags:["singleton"], desc:"AssistantManager subscribes to its static TeleportStarted/TeleportCompleted events." },
+      { id:"UI", label:"UIInteraction", col:4, row:3, desc:"Calls TriggerBotUI/HideBotUI on AssistantManager for interactions with no scene-authored panel of their own." },
+      { id:"SF", label:"ScreenFade", col:2, row:4, tags:["singleton"], desc:"Sphere-based full-screen fade + message overlay, driven by TeleportManager." },
+      { id:"CB", label:"CustomButton", col:4, row:4, desc:"Touch-based VR hold-button wrapped by UIInteraction for scene-authored button UI." }
+    ], edges: [
+      { from:"AM", to:"BC", kind:"owns", desc:"Summon / Dismiss / OnPromptShown / ShowBotUI / HideBotUI — AssistantManager drives BotController directly for nearly every panel event." },
+      { from:"BC", to:"BGB", kind:"event", desc:"Subscribes to BotGuideBehaviour's static GuideFinished event to know when to switch back from Guide mode to Companion mode." },
+      { from:"BGB", to:"GPF", kind:"calls", desc:"ComputePathWorld — grid-based pathfinding to lead the player toward the guidance target." },
+      { from:"BC", to:"SND", kind:"calls", desc:"PlayBotSummon/Dismiss/HelpCalled/PromptShown/UIOpen/UIClose/Discard — a sound sting for every bot state transition." },
+      { from:"SND", to:"HAP", kind:"calls", desc:"Most SoundManager play-methods also fire a matching HapticManager call — audio and haptics are tightly paired from one call site." },
+      { from:"CM", to:"AM", kind:"event", desc:"onContaminationTriggered/Resolved, onSpeedViolationTriggered/Resolved — per-zone panels, tracked concurrently via a Dictionary/HashSet pair instead of one shared panel." },
+      { from:"FAM", to:"AM", kind:"event", desc:"onFirstAirTriggered/Resolved — its own tracked panel set + CTS map, fully independent of Contamination's and Hand-Speed's, so all three can be open at once." },
+      { from:"AM", to:"TP", kind:"event", desc:"Subscribes to TeleportStarted/TeleportCompleted to hide/restore panels across a teleport." },
+      { from:"TP", to:"SF", kind:"calls", desc:"Drives the sphere fade-out → move → fade-in teleport sequence." },
+      { from:"ALE", to:"AM", kind:"event", desc:"Static AlertStarted/AlertFinished — AssistantManager invokes these around contamination/hand-speed alerts to trigger the screen vignette." },
+      { from:"AM", to:"PBC", kind:"calls", desc:"Enables panel colliders only once a pop-in animation fully completes." },
+      { from:"AM", to:"DC", kind:"calls", desc:"Hands objects to DissolveController for the dissolve-out discard path." },
+      { from:"UI", to:"AM", kind:"calls", desc:"TriggerBotUI(content, callback) / HideBotUI() for bot-handled interactions with no scene UI assigned." },
+      { from:"UI", to:"CB", kind:"owns", desc:"Wraps a CustomButton for the hold-to-click interaction when a scene panel/button IS assigned." },
+      { from:"ASM", to:"AM", kind:"calls", desc:"ShowHintPrompt(_currentSimState) when the assessment hint button is used." }
+    ]},
+
+    assess: { title: "Assessment & scoring system", nodes: [
+      { id:"ASM", label:"AssessmentManager", col:2, row:0, tags:["singleton","core"], desc:"Owns all assessment/scoring logic, now including central Contamination/First Air/Fast Hand penalty amounts and the ContaminationManager/FirstAirManager references those penalties are driven by." },
+      { id:"SM", label:"SimulationManager", col:0, row:1, tags:["singleton"], desc:"AssessmentManager reads simulationMode and currentState directly from here." },
+      { id:"AC", label:"AssessmentController", col:2, row:1, desc:"Sibling component added directly to each SimulationState's GameObject. Pure config — interactionConfigs (max score auto-split from a compulsory 1 mark, penalties, wrong-detect/wrong-grab lists), the contaminationAssessed/firstAirAssessed/fastHandAssessed checkboxes, and the contaminationMessage/firstAirMessage/hintTakenMessage API fields." },
+      { id:"SS", label:"SimulationState", col:4, row:1, desc:"Calls INTO AssessmentManager at every lifecycle point — BeginState, OnInteractionStarted, OnInteractionCompleted, CloseState." },
+      { id:"AM", label:"AssistantManager", col:0, row:2, tags:["singleton"], desc:"AssessmentManager calls ShowHintPrompt on this when the hint button is used." },
+      { id:"GI", label:"GrabInteraction", col:1, row:2, desc:"AssessmentManager directly swaps canInteract, resetOnRelease, calls ForceUngrab, and toggles grabHighlightController for 'wrong answer' zone logic." },
+      { id:"DI", label:"DetectInteraction", col:3, row:2, desc:"AssessmentManager calls SetupWrongObjects/ClearWrongObjects, listens for OnWOTDEntered, and swaps canInteract directly for wrong-object-then-detect scoring." },
+      { id:"INT", label:"Interactions / Gaze / Idle / UI", col:4, row:2, desc:"SetRadialUIVisible and other visual toggles used to show/hide hint-eligible interaction highlights." },
+      { id:"CB", label:"CustomButton", col:2, row:3, desc:"AssessmentManager wires the hint button's OnButtonClicked listener directly." },
+      { id:"DA", label:"DetectAssessment", col:4, row:3, tags:["dead"], desc:"An older, separate per-interaction assessment component. Confirmed NOT actually driven by AssessmentManager's live runtime flow — the real wrong-answer logic lives entirely in AssessmentController.interactionConfigs." },
+      { id:"CM", label:"ContaminationManager", col:0, row:0, tags:["singleton"], desc:"Fires onContaminationTriggered / onSpeedViolationTriggered (Fast Hand). AssessmentManager subscribes directly and deducts a central penalty from the active step if that step's AssessmentController has the matching checkbox on." },
+      { id:"FAM", label:"FirstAirManager", col:4, row:0, tags:["singleton"], desc:"Fires onFirstAirTriggered. AssessmentManager subscribes directly, same as ContaminationManager." }
+    ], edges: [
+      { from:"ASM", to:"SM", kind:"calls", desc:"Reads simulationMode and currentState directly to gate its own _isAssessmentMode flag and compute max score." },
+      { from:"ASM", to:"AC", kind:"calls", desc:"GetComponent<AssessmentController>() on the state's GameObject, reads interactionConfigs / GetMaxScoreForState." },
+      { from:"SS", to:"ASM", kind:"calls", desc:"BeginState / OnInteractionStarted / OnInteractionCompleted / CloseState / DisableVisualsAfterStart — called BY SimulationState at each lifecycle boundary." },
+      { from:"ASM", to:"AM", kind:"calls", desc:"ShowHintPrompt(_currentSimState) on hint click, and again on a Contamination/First Air trigger (same prompt+highlight reveal, without touching hint bookkeeping/score)." },
+      { from:"ASM", to:"GI", kind:"calls", desc:"Direct canInteract swap, resetOnRelease toggle, ForceUngrab(), and grabHighlightController Show/HideHighlight — for wrong-zone assessment logic." },
+      { from:"ASM", to:"DI", kind:"calls", desc:"SetupWrongObjects/ClearWrongObjects, subscribes to OnWOTDEntered, direct canInteract swap." },
+      { from:"ASM", to:"INT", kind:"calls", desc:"SetRadialUIVisible() and visual toggling for hint-eligible interactions across Gaze/Idle/UI types." },
+      { from:"ASM", to:"CB", kind:"owns", desc:"Wires the hint button's OnButtonClicked listener." },
+      { from:"DA", to:"SM", kind:"calls", desc:"Reads simulationMode (legacy path, still functional but unused in the live flow)." },
+      { from:"DA", to:"DI", kind:"calls", desc:"ChangeDetectType — confirmed not actually invoked anywhere in AssessmentManager's real runtime path." },
+      { from:"CM", to:"ASM", kind:"event", desc:"onContaminationTriggered deducts contaminationPenalty (defaults to the full 1-mark step score) and replays the hint-style prompt+highlight reveal; onSpeedViolationTriggered (Fast Hand) deducts fastHandPenalty (defaults 0.5) silently — both only if the active step's checkbox is on." },
+      { from:"FAM", to:"ASM", kind:"event", desc:"onFirstAirTriggered deducts firstAirPenalty (defaults to the full 1-mark step score) and replays the hint-style prompt+highlight reveal, same gating as Contamination." }
+    ]},
+
+    highlight: { title: "Grab highlight render pipeline (URP)", nodes: [
+      { id:"GI", label:"GrabInteraction / PartsIdentificationManager", col:0, row:0, desc:"Both call ShowHighlight()/HideHighlight() on a GrabHighlightController to turn the outline on and off." },
+      { id:"GHC", label:"GrabHighlightController", col:2, row:0, desc:"Per-object — fades the highlight amount and swaps the GameObject's layer to 'Grabbable' so the render pass picks it up." },
+      { id:"GHE", label:"GrabHighlightExclude", col:2, row:1, desc:"Marker component. GrabHighlightController skips any renderer under an object carrying this marker." },
+      { id:"GHR", label:"GrabHighlightRegistry", col:4, row:0, tags:["core"], desc:"Static registry — the live list of renderers currently eligible for the highlight, with per-entry amount/rim-color. GrabHighlightOptOut (added this session) is a marker of the same shape as GrabHighlightExclude, attached to the grab timer UI so its own renderer never gets swept into this system." },
+      { id:"GHP", label:"GrabHighlightPass", col:4, row:1, desc:"URP ScriptableRenderPass — reads GrabHighlightRegistry.ActiveRenderers every frame and draws the outline overlay." },
+      { id:"GHF", label:"GrabHighlightFeature", col:4, row:2, desc:"URP ScriptableRendererFeature — creates and enqueues a GrabHighlightPass each frame." }
+    ], edges: [
+      { from:"GI", to:"GHC", kind:"calls", desc:"ShowHighlight()/HideHighlight() — fades the outline amount and swaps the object's layer to 'Grabbable'." },
+      { from:"GHC", to:"GHE", kind:"calls", desc:"Checks for this marker component on a renderer's hierarchy and skips the whole subtree if present." },
+      { from:"GHC", to:"GHR", kind:"calls", desc:"Register()/Unregister() — adds or removes this object's renderers from the static active-renderer list." },
+      { from:"GHF", to:"GHP", kind:"owns", desc:"Creates and enqueues a fresh GrabHighlightPass every single frame (standard URP ScriptableRendererFeature pattern)." },
+      { from:"GHP", to:"GHR", kind:"calls", desc:"Reads the static ActiveRenderers list once per frame to know what to draw the outline overlay on." }
+    ]},
+
+    platform: { title: "Platform shell", nodes: [
+      { id:"LM", label:"LoginManager", col:0, row:0, tags:["singleton"], desc:"Legacy v1 PIN login flow UI. Talks to APICollection, APIHelper, GameManager, PlayerPrefsManager, SceneHandler, UIManager." },
+      { id:"GM", label:"GameManager", col:1, row:0, tags:["singleton"], desc:"Legacy v1 global session/scene-mode singleton — userID, role, loggedIn, sceneType." },
+      { id:"PM", label:"PopulateModules", col:0, row:1, desc:"Fetches/renders the module list cards (legacy v1)." },
+      { id:"PS", label:"PopulateSimulations", col:1, row:1, desc:"Fetches/renders the simulation list cards and launches simulations (legacy v1)." },
+      { id:"SH", label:"SceneHandler", col:0, row:2, tags:["singleton"], desc:"Legacy v1 singleton — scene-change coroutine + transition events." },
+      { id:"SAL", label:"SimulationAssetLoader", col:1, row:2, tags:["singleton"], desc:"Legacy v1 singleton — loads a simulation scene from a local AssetBundle." },
+      { id:"SDL", label:"SimulationDownloadManager", col:0, row:3, tags:["singleton"], desc:"Legacy v1 singleton registry/factory of SimulationDownloader workers." },
+      { id:"UIM", label:"UIManager", col:1, row:3, tags:["singleton"], desc:"Legacy v1 singleton — panel show/hide orchestrator." },
+      { id:"SESS", label:"SessionManager", col:2, row:2, tags:["singleton","core"], desc:"v2.0/API singleton. The ONLY class that reaches across from the Platform layer into the Core Runtime (SimulationManager.Instance) — the single seam joining the two halves of the project." },
+      { id:"NLM", label:"NewLoginManager", col:3, row:0, desc:"v2.0 PIN-login UI flow with auto-login animation." },
+      { id:"PGM", label:"PlatformGameManager", col:4, row:0, tags:["singleton"], desc:"v2.0 singleton — org/user/device session state, menu-button scene return." },
+      { id:"DM", label:"DeviceManager", col:3, row:1, desc:"Device pairing/registration & revalidation UI flow." },
+      { id:"NAM", label:"NewAPIManager", col:4, row:1, tags:["singleton"], desc:"v2.0 singleton HTTP client (GET/POST/texture/bundle download) — the active API layer." },
+      { id:"CTM", label:"ContentManager", col:3, row:2, desc:"Main v2.0 home-screen controller (modules/simulations/leaderboard/progress tabs)." },
+      { id:"ABM", label:"AssetBundleManager", col:4, row:2, tags:["singleton"], desc:"v2.0 singleton — caches bundle version metadata, downloads/loads AssetBundles." },
+      { id:"MHM", label:"MessageHandleManager", col:3, row:3, tags:["singleton"], desc:"v2.0 singleton — global toast/message UI (hint/success/failure)." },
+      { id:"PBM", label:"ProgressBarManager", col:4, row:3, tags:["singleton"], desc:"v2.0 singleton — global download/launch progress bar UI." },
+      { id:"NAC", label:"NewAPICollections", col:4, row:4, desc:"Instance class building v2.0 REST endpoint URLs, environment-aware." },
+      { id:"SM", label:"SimulationManager", col:2, row:4, tags:["singleton","core"], desc:"Core Runtime's top-level state machine. See Fig. 02 for its full connection map." }
+    ], edges: [
+      { from:"LM", to:"GM", kind:"calls", desc:"Legacy login flow updates GameManager's global session state on success." },
+      { from:"GM", to:"SH", kind:"calls", desc:"SwitchToMainScene and similar scene-transition calls." },
+      { from:"PM", to:"GM", kind:"calls", desc:"Reads GameManager for auth/session context while populating module cards." },
+      { from:"PS", to:"GM", kind:"calls", desc:"Reads GameManager for auth/session context while populating simulation cards." },
+      { from:"PS", to:"SDL", kind:"calls", desc:"Kicks off downloads via SimulationDownloadManager when a simulation is selected." },
+      { from:"PS", to:"SAL", kind:"calls", desc:"Loads the downloaded simulation's AssetBundle scene via SimulationAssetLoader." },
+      { from:"SAL", to:"GM", kind:"calls", desc:"SwitchToSimulation — hands off to GameManager once the bundle scene is ready." },
+      { from:"NLM", to:"PGM", kind:"calls", desc:"Sets device/user auth state on successful v2.0 login." },
+      { from:"NLM", to:"NAM", kind:"calls", desc:"Performs the actual login HTTP request." },
+      { from:"DM", to:"PGM", kind:"calls", desc:"Updates platform session state after device pairing." },
+      { from:"DM", to:"NAM", kind:"calls", desc:"Device pairing/registration HTTP requests." },
+      { from:"CTM", to:"NAM", kind:"calls", desc:"Nearly every home-screen data fetch (modules, simulations, leaderboard, progress) goes through NewAPIManager." },
+      { from:"CTM", to:"ABM", kind:"calls", desc:"Triggers AssetBundle downloads for selected content." },
+      { from:"CTM", to:"PBM", kind:"calls", desc:"Drives the global progress bar during downloads/launches." },
+      { from:"CTM", to:"SESS", kind:"calls", desc:"SetActiveSimulationID — a second, otherwise-undocumented touch point into SessionManager from the platform layer." },
+      { from:"ABM", to:"NAM", kind:"calls", desc:"Uses NewAPIManager's AssetBundleDownloader for the actual transfer." },
+      { from:"NAM", to:"MHM", kind:"calls", desc:"Surfaces network errors as toast messages." },
+      { from:"NAM", to:"NAC", kind:"calls", desc:"Builds every request URL through NewAPICollections." },
+      { from:"SESS", to:"NAM", kind:"calls", desc:"Session create/update/end requests go through NewAPIManager." },
+      { from:"SESS", to:"PGM", kind:"calls", desc:"Reads org/user/device identity from PlatformGameManager for session payloads." },
+      { from:"SESS", to:"SM", kind:"event", desc:"SessionManager and SimulationManager call each other directly — the only bridge between the Platform shell and the Core Runtime. SimulationManager calls CreateSession/UpdateSession/EndSession/GetElapsedTime/ResetElapsedTime; SessionManager calls back AssignStepSessionID and toggles setModeUI." }
+    ]},
+
+    location: { title: "Location system", nodes: [
+      { id:"LM", label:"LocationManager", col:0, row:0, tags:["singleton","dead"], desc:"Singleton. Activates/deactivates scene objects based on the active location index. Confirmed: zero references to this class exist anywhere outside v2.0/Location/." },
+      { id:"LT", label:"LocationTag", col:1, row:0, tags:["dead"], desc:"Per-object component declaring which location(s) it belongs to." },
+      { id:"LD", label:"LocationData", col:2, row:0, tags:["dead"], desc:"ScriptableObject holding the flat list of location names — pure data." }
+    ], edges: [
+      { from:"LM", to:"LT", kind:"calls", desc:"FindObjectsByType<LocationTag>() each time the active location changes, to know what to show/hide." },
+      { from:"LT", to:"LD", kind:"calls", desc:"Index lookup into the location name list to resolve its own display name." },
+      { from:"LM", to:"LD", kind:"calls", desc:"Reads the active-location index directly against the same data asset." }
+    ]}
+  };
+
+  /* ============================= LAYOUT ENGINE ============================= */
+  var COL_W = 202, ROW_H = 116, BOX_W = 172, BOX_H = 58, MARGIN_X = 30, MARGIN_Y = 26;
+
+  function layout(d) {
+    var nodes = {}, maxCol = 0, maxRow = 0;
+    d.nodes.forEach(function(n){
+      maxCol = Math.max(maxCol, n.col);
+      maxRow = Math.max(maxRow, n.row);
+      nodes[n.id] = { data:n, x: MARGIN_X + n.col*COL_W, y: MARGIN_Y + n.row*ROW_H, w: BOX_W, h: BOX_H };
+    });
+    return { nodes: nodes, width: MARGIN_X*2 + (maxCol+1)*COL_W - (COL_W-BOX_W), height: MARGIN_Y*2 + (maxRow+1)*ROW_H - (ROW_H-BOX_H) };
+  }
+
+  function anchor(n, side) {
+    if (side==='top') return [n.x+n.w/2, n.y];
+    if (side==='bottom') return [n.x+n.w/2, n.y+n.h];
+    if (side==='left') return [n.x, n.y+n.h/2];
+    return [n.x+n.w, n.y+n.h/2];
+  }
+
+  function edgePath(a, b) {
+    var acx=a.x+a.w/2, acy=a.y+a.h/2, bcx=b.x+b.w/2, bcy=b.y+b.h/2;
+    var dx=bcx-acx, dy=bcy-acy, p1, p2, c1, c2;
+    if (Math.abs(dy) >= Math.abs(dx)) {
+      p1 = anchor(a, dy>0?'bottom':'top');
+      p2 = anchor(b, dy>0?'top':'bottom');
+      var my = (p1[1]+p2[1])/2;
+      c1=[p1[0], my]; c2=[p2[0], my];
+    } else {
+      p1 = anchor(a, dx>0?'right':'left');
+      p2 = anchor(b, dx>0?'left':'right');
+      var mx = (p1[0]+p2[0])/2;
+      c1=[mx, p1[1]]; c2=[mx, p2[1]];
+    }
+    return "M " + p1[0] + " " + p1[1] + " C " + c1[0] + " " + c1[1] + ", " + c2[0] + " " + c2[1] + ", " + p2[0] + " " + p2[1];
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  function renderDiagram(key) {
+    var d = DIAGRAMS[key];
+    var canvas = document.getElementById('canvas-' + key);
+    var panel = document.getElementById('panel-' + key);
+    var L = layout(d);
+    var svg = '<svg viewBox="0 0 ' + L.width + ' ' + L.height + '" width="' + L.width + '" height="' + L.height + '" role="img" aria-label="' + esc(d.title) + ' diagram">';
+    svg += '<defs>';
+    ['calls','event','owns','none'].forEach(function(k){
+      svg += '<marker id="arrow-' + k + '-' + key + '" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrowhead ' + k + '"></path></marker>';
+    });
+    svg += '</defs>';
+
+    d.edges.forEach(function(e, i){
+      var a = L.nodes[e.from], b = L.nodes[e.to];
+      if (!a || !b) return;
+      var path = edgePath(a, b);
+      svg += '<g class="edge kind-' + e.kind + '" tabindex="0" role="button" data-edge="' + i + '" aria-label="' + esc(e.from) + ' to ' + esc(e.to) + '">' +
+             '<path class="edge-hit" d="' + path + '"></path>' +
+             '<path class="edge-line" d="' + path + '" marker-end="url(#arrow-' + e.kind + '-' + key + ')"></path>' +
+             '</g>';
+    });
+
+    d.nodes.forEach(function(n){
+      var nn = L.nodes[n.id];
+      var tagHtml = '';
+      if (n.tags && n.tags.length) {
+        tagHtml = '<div class="node-tags">' + n.tags.map(function(t){ return '<span class="ntag ' + t + '">' + t + '</span>'; }).join('') + '</div>';
+      }
+      svg += '<g class="node" tabindex="0" role="button" data-node="' + n.id + '" aria-label="' + esc(n.label) + '">' +
+             '<rect class="node-box" x="' + nn.x + '" y="' + nn.y + '" width="' + nn.w + '" height="' + nn.h + '" rx="6"></rect>' +
+             '<foreignObject x="' + nn.x + '" y="' + nn.y + '" width="' + nn.w + '" height="' + nn.h + '">' +
+             '<div xmlns="http://www.w3.org/1999/xhtml" class="node-fo"><div><div class="node-label">' + esc(n.label) + '</div>' + tagHtml + '</div></div>' +
+             '</foreignObject></g>';
+    });
+
+    svg += '</svg>';
+    canvas.innerHTML = svg;
+
+    function clearSel(){
+      var actives = canvas.querySelectorAll('.node.active, .edge.active');
+      for (var i=0;i<actives.length;i++) actives[i].classList.remove('active');
+    }
+
+    function labelOf(id){ var n = d.nodes.filter(function(x){return x.id===id;})[0]; return n ? n.label : id; }
+
+    function showNode(id){
+      clearSel();
+      var el = canvas.querySelector('[data-node="' + id + '"]');
+      if (el) el.classList.add('active');
+      var n = d.nodes.filter(function(x){return x.id===id;})[0];
+      if (!n) return;
+      var out = [], inc = [];
+      d.edges.forEach(function(e, i){ if (e.from===id) out.push(i); if (e.to===id) inc.push(i); });
+      var html = '<div class="panel-kicker">Script</div><h4>' + esc(n.label) + '</h4>';
+      if (n.tags && n.tags.length) html += '<div class="node-tags">' + n.tags.map(function(t){return '<span class="ntag ' + t + '">' + t + '</span>';}).join('') + '</div>';
+      html += '<p>' + esc(n.desc) + '</p>';
+      if (out.length) {
+        html += '<div class="panel-kicker" style="margin-top:14px">Calls / drives</div><ul class="panel-list">';
+        out.forEach(function(i){ var e = d.edges[i]; html += '<li><button class="edgejump" data-jump="' + i + '">&rarr; ' + esc(labelOf(e.to)) + '</button><span class="ekind ' + e.kind + '">' + e.kind + '</span></li>'; });
+        html += '</ul>';
+      }
+      if (inc.length) {
+        html += '<div class="panel-kicker" style="margin-top:14px">Called by</div><ul class="panel-list">';
+        inc.forEach(function(i){ var e = d.edges[i]; html += '<li><button class="edgejump" data-jump="' + i + '">&larr; ' + esc(labelOf(e.from)) + '</button><span class="ekind ' + e.kind + '">' + e.kind + '</span></li>'; });
+        html += '</ul>';
+      }
+      panel.innerHTML = html;
+      bindJumps();
+    }
+
+    function showEdge(i){
+      clearSel();
+      var el = canvas.querySelector('[data-edge="' + i + '"]');
+      if (el) el.classList.add('active');
+      var e = d.edges[i];
+      var html = '<div class="panel-kicker">Connection</div><h4>' + esc(labelOf(e.from)) + ' &rarr; ' + esc(labelOf(e.to)) + '</h4>' +
+                 '<span class="ekind ' + e.kind + '">' + e.kind + '</span><p style="margin-top:10px">' + esc(e.desc) + '</p>';
+      panel.innerHTML = html;
+    }
+
+    function bindJumps(){
+      var btns = panel.querySelectorAll('.edgejump');
+      for (var i=0;i<btns.length;i++) {
+        btns[i].addEventListener('click', (function(idx){ return function(){ showEdge(idx); }; })(+btns[i].getAttribute('data-jump')));
+      }
+    }
+
+    var nodeEls = canvas.querySelectorAll('[data-node]');
+    for (var i=0;i<nodeEls.length;i++) {
+      (function(el){
+        var id = el.getAttribute('data-node');
+        el.addEventListener('click', function(){ showNode(id); });
+        el.addEventListener('keydown', function(ev){ if (ev.key==='Enter' || ev.key===' ') { ev.preventDefault(); showNode(id); } });
+      })(nodeEls[i]);
+    }
+    var edgeEls = canvas.querySelectorAll('[data-edge]');
+    for (var j=0;j<edgeEls.length;j++) {
+      (function(el){
+        var idx = +el.getAttribute('data-edge');
+        el.addEventListener('click', function(){ showEdge(idx); });
+        el.addEventListener('keydown', function(ev){ if (ev.key==='Enter' || ev.key===' ') { ev.preventDefault(); showEdge(idx); } });
+      })(edgeEls[j]);
+    }
+  }
+
+  Object.keys(DIAGRAMS).forEach(renderDiagram);
+
+  /* ============================= REFERENCE SEARCH ============================= */
+  var searchBox = document.getElementById('refSearch');
+  if (searchBox) {
+    searchBox.addEventListener('input', function(){
+      var q = searchBox.value.toLowerCase();
+      var rows = document.querySelectorAll('#refRoot dl.reflist > div');
+      for (var i=0;i<rows.length;i++) {
+        var txt = rows[i].textContent.toLowerCase();
+        rows[i].style.display = txt.indexOf(q) !== -1 ? '' : 'none';
+      }
+      var groups = document.querySelectorAll('#refRoot .refgroup');
+      for (var g=0; g<groups.length; g++) {
+        var visRows = groups[g].querySelectorAll('dl.reflist > div');
+        var anyVisible = false;
+        for (var r=0;r<visRows.length;r++) { if (visRows[r].style.display !== 'none') { anyVisible = true; break; } }
+        groups[g].style.display = anyVisible ? '' : 'none';
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>

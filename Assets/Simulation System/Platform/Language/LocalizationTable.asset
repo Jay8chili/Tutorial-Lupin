@@ -1,0 +1,1005 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9db5fb94b8ffac14e89c54c1d9491d69, type: 3}
+  m_Name: LocalizationTable
+  m_EditorClassIdentifier: Assembly-CSharp::LocalizationTable
+  defaultLanguage: en
+  languages:
+  - es
+  entries:
+  - key: Row3_N_TextTMP
+    sourceText: N
+    origin: Canvas/Device Pairing/Keyboard/Row 3/N/Text (TMP)
+    translations:
+    - languageCode: es
+      value: norte
+      machineTranslated: 1
+      translatedFrom: N
+  - key: Row3_B_TextTMP
+    sourceText: B
+    origin: Canvas/Device Pairing/Keyboard/Row 3/B/Text (TMP)
+    translations:
+    - languageCode: es
+      value: B
+      machineTranslated: 1
+      translatedFrom: B
+  - key: SideBar_LeaderBoard_TextTMP
+    sourceText: Leaderboard
+    origin: Canvas/ContentManager/Layout/SideBar/LeaderBoard/Text (TMP)
+    translations:
+    - languageCode: es
+      value: "Tabla de clasificaci\xF3n"
+      machineTranslated: 1
+      translatedFrom: Leaderboard
+  - key: Leaderboard_LeaderboardTitle_NameTMP
+    sourceText: Name
+    origin: Canvas/ContentManager/Layout/Content/Leaderboard/Leaderboard-Title/Name(TMP)
+    translations:
+    - languageCode: es
+      value: Nombre
+      machineTranslated: 1
+      translatedFrom: Name
+  - key: 6_Highlight_TextTMP1
+    sourceText: 1
+    origin: Canvas/LoginPanel/Numpad/Row1/6/Highlight/Text (TMP) (1)
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Row0_9_TextTMP
+    sourceText: 9
+    origin: Canvas/Device Pairing/Keyboard/Row 0/9/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 9
+      machineTranslated: 1
+      translatedFrom: 9
+  - key: 0_Highlight_TextTMP1
+    sourceText: 1
+    origin: Canvas/LoginPanel/Numpad/Row3/0/Highlight/Text (TMP) (1)
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Row2_L_TextTMP
+    sourceText: L
+    origin: Canvas/Device Pairing/Keyboard/Row 2/L/Text (TMP)
+    translations:
+    - languageCode: es
+      value: l
+      machineTranslated: 1
+      translatedFrom: L
+  - key: Row2_A_TextTMP
+    sourceText: A
+    origin: Canvas/Device Pairing/Keyboard/Row 2/A/Text (TMP)
+    translations:
+    - languageCode: es
+      value: A
+      machineTranslated: 1
+      translatedFrom: A
+  - key: Row0_2_TextTMP
+    sourceText: 2
+    origin: Canvas/Device Pairing/Keyboard/Row 0/2/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 2
+      machineTranslated: 1
+      translatedFrom: 2
+  - key: Leaderboard_LeaderboardTitle_NoTMP
+    sourceText: No.
+    origin: Canvas/ContentManager/Layout/Content/Leaderboard/Leaderboard-Title/No
+      (TMP)
+    translations:
+    - languageCode: es
+      value: No.
+      machineTranslated: 1
+      translatedFrom: No.
+  - key: Row3_C_TextTMP
+    sourceText: C
+    origin: Canvas/Device Pairing/Keyboard/Row 3/C/Text (TMP)
+    translations:
+    - languageCode: es
+      value: do
+      machineTranslated: 1
+      translatedFrom: C
+  - key: Row0_3_TextTMP
+    sourceText: 3
+    origin: Canvas/Device Pairing/Keyboard/Row 0/3/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 3
+      machineTranslated: 1
+      translatedFrom: 3
+  - key: Row0_1_TextTMP
+    sourceText: 1
+    origin: Canvas/Device Pairing/Keyboard/Row 0/1/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: 3_Highlight_TextTMP1
+    sourceText: 1
+    origin: Canvas/LoginPanel/Numpad/Row0/3/Highlight/Text (TMP) (1)
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Canvas_DevicePairing_TextTMP
+    sourceText: Device Pairing
+    origin: Canvas/Device Pairing/Text (TMP)
+    translations:
+    - languageCode: es
+      value: Emparejamiento de dispositivos
+      machineTranslated: 1
+      translatedFrom: Device Pairing
+  - key: Content_Simulations_TextTMP
+    sourceText: Simulations
+    origin: Canvas/ContentManager/Layout/Content/Simulations/Text (TMP)
+    translations:
+    - languageCode: es
+      value: Simulaciones
+      machineTranslated: 1
+      translatedFrom: Simulations
+  - key: Row1_4_TextTMP
+    sourceText: 4
+    origin: Canvas/LoginPanel/Numpad/Row1/4/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 4
+      machineTranslated: 1
+      translatedFrom: 4
+  - key: Canvas_LanguageSelector_TextTMP
+    sourceText: Select your language
+    origin: Canvas/LanguageSelector/Text (TMP)
+    translations:
+    - languageCode: es
+      value: Selecciona tu idioma
+      machineTranslated: 1
+      translatedFrom: Select your language
+  - key: 9_Highlight_TextTMP1
+    sourceText: 1
+    origin: Canvas/LoginPanel/Numpad/Row2/9/Highlight/Text (TMP) (1)
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Content_Progress_TextTMP2
+    sourceText: Simulation Progress
+    origin: Canvas/ContentManager/Layout/Content/Progress/Text (TMP) (2)
+    translations:
+    - languageCode: es
+      value: "Progreso de la simulaci\xF3n"
+      machineTranslated: 1
+      translatedFrom: Simulation Progress
+  - key: Row1_W_TextTMP
+    sourceText: W
+    origin: Canvas/Device Pairing/Keyboard/Row 1/W/Text (TMP)
+    translations:
+    - languageCode: es
+      value: W.
+      machineTranslated: 1
+      translatedFrom: W
+  - key: Row2_7_TextTMP
+    sourceText: 7
+    origin: Canvas/LoginPanel/Numpad/Row2/7/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 7
+      machineTranslated: 1
+      translatedFrom: 7
+  - key: Row1_E_TextTMP
+    sourceText: E
+    origin: Canvas/Device Pairing/Keyboard/Row 1/E/Text (TMP)
+    translations:
+    - languageCode: es
+      value: mi
+      machineTranslated: 1
+      translatedFrom: E
+  - key: Row1_I_TextTMP
+    sourceText: I
+    origin: Canvas/Device Pairing/Keyboard/Row 1/I/Text (TMP)
+    translations:
+    - languageCode: es
+      value: I
+      machineTranslated: 1
+      translatedFrom: I
+  - key: Canvas_LoginPanel_PinLabel
+    sourceText: Enter 6 Digit Pin
+    origin: Canvas/LoginPanel/PinLabel
+    translations:
+    - languageCode: es
+      value: "Ingrese el PIN de 6 d\xEDgitos"
+      machineTranslated: 1
+      translatedFrom: Enter 6 Digit Pin
+  - key: Content_Modules_TextTMP
+    sourceText: Modules
+    origin: Canvas/ContentManager/Layout/Content/Modules/Text (TMP)
+    translations:
+    - languageCode: es
+      value: "M\xF3dulos"
+      machineTranslated: 1
+      translatedFrom: Modules
+  - key: Row1_U_TextTMP
+    sourceText: U
+    origin: Canvas/Device Pairing/Keyboard/Row 1/U/Text (TMP)
+    translations:
+    - languageCode: es
+      value: Ud.
+      machineTranslated: 1
+      translatedFrom: U
+  - key: Row2_J_TextTMP
+    sourceText: J
+    origin: Canvas/Device Pairing/Keyboard/Row 2/J/Text (TMP)
+    translations:
+    - languageCode: es
+      value: j
+      machineTranslated: 1
+      translatedFrom: J
+  - key: Row1_O_TextTMP
+    sourceText: O
+    origin: Canvas/Device Pairing/Keyboard/Row 1/O/Text (TMP)
+    translations:
+    - languageCode: es
+      value: oh
+      machineTranslated: 1
+      translatedFrom: O
+  - key: Content_ModulePrefab_Description
+    sourceText: Description
+    origin: Canvas/ContentManager/Layout/Content/Modules/Scroll View/Viewport/Content/ModulePrefab/Description
+    translations:
+    - languageCode: es
+      value: "Descripci\xF3n"
+      machineTranslated: 1
+      translatedFrom: Description
+  - key: Row1_R_TextTMP
+    sourceText: R
+    origin: Canvas/Device Pairing/Keyboard/Row 1/R/Text (TMP)
+    translations:
+    - languageCode: es
+      value: R
+      machineTranslated: 1
+      translatedFrom: R
+  - key: BACKSPACE_Highlight_TextTMP1
+    sourceText: 1
+    origin: Canvas/LoginPanel/Numpad/Row3/BACKSPACE/Highlight/Text (TMP) (1)
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Row0_0_TextTMP
+    sourceText: 0
+    origin: Canvas/Device Pairing/Keyboard/Row 0/0/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 0
+      machineTranslated: 1
+      translatedFrom: 0
+  - key: Canvas_ContentManager_TextTMP
+    sourceText: 'Hello '
+    origin: Canvas/ContentManager/Text (TMP)
+    translations:
+    - languageCode: es
+      value: Hola
+      machineTranslated: 1
+      translatedFrom: 'Hello '
+  - key: Row0_4_TextTMP
+    sourceText: 4
+    origin: Canvas/Device Pairing/Keyboard/Row 0/4/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 4
+      machineTranslated: 1
+      translatedFrom: 4
+  - key: Content_ModulePrefab_Title
+    sourceText: Title
+    origin: Canvas/ContentManager/Layout/Content/Modules/Scroll View/Viewport/Content/ModulePrefab/Title
+    translations:
+    - languageCode: es
+      value: "T\xEDtulo"
+      machineTranslated: 1
+      translatedFrom: Title
+  - key: Row2_9_TextTMP
+    sourceText: 9
+    origin: Canvas/LoginPanel/Numpad/Row2/9/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 9
+      machineTranslated: 1
+      translatedFrom: 9
+  - key: Summary_Values_GuidedAttemptsVal
+    sourceText: 1
+    origin: Canvas/ContentManager/Layout/Content/Progress/Summary/Values/GuidedAttempts-Val
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Row3_0_TextTMP
+    sourceText: 0
+    origin: Canvas/LoginPanel/Numpad/Row3/0/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 0
+      machineTranslated: 1
+      translatedFrom: 0
+  - key: Summary_Values_TotalTimeSpentVal
+    sourceText: 1
+    origin: Canvas/ContentManager/Layout/Content/Progress/Summary/Values/TotalTimeSpent-Val
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Row0_7_TextTMP
+    sourceText: 7
+    origin: Canvas/Device Pairing/Keyboard/Row 0/7/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 7
+      machineTranslated: 1
+      translatedFrom: 7
+  - key: Row3_M_TextTMP
+    sourceText: M
+    origin: Canvas/Device Pairing/Keyboard/Row 3/M/Text (TMP)
+    translations:
+    - languageCode: es
+      value: METRO
+      machineTranslated: 1
+      translatedFrom: M
+  - key: Row0_5_TextTMP
+    sourceText: 5
+    origin: Canvas/Device Pairing/Keyboard/Row 0/5/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 5
+      machineTranslated: 1
+      translatedFrom: 5
+  - key: Row0_6_TextTMP
+    sourceText: 6
+    origin: Canvas/Device Pairing/Keyboard/Row 0/6/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 6
+      machineTranslated: 1
+      translatedFrom: 6
+  - key: Row2_S_TextTMP
+    sourceText: S
+    origin: Canvas/Device Pairing/Keyboard/Row 2/S/Text (TMP)
+    translations:
+    - languageCode: es
+      value: S
+      machineTranslated: 1
+      translatedFrom: S
+  - key: Row3_V_TextTMP
+    sourceText: V
+    origin: Canvas/Device Pairing/Keyboard/Row 3/V/Text (TMP)
+    translations:
+    - languageCode: es
+      value: V
+      machineTranslated: 1
+      translatedFrom: V
+  - key: ModulePrefab_Select_TextTMP
+    sourceText: Select
+    origin: Canvas/ContentManager/Layout/Content/Modules/Scroll View/Viewport/Content/ModulePrefab/Select/Text
+      (TMP)
+    translations:
+    - languageCode: es
+      value: Seleccionar
+      machineTranslated: 1
+      translatedFrom: Select
+  - key: Summary_Title_TotalScore
+    sourceText: Total VR Score
+    origin: Canvas/ContentManager/Layout/Content/Progress/Summary/Title/Total Score
+    translations:
+    - languageCode: es
+      value: "Puntuaci\xF3n total de realidad virtual"
+      machineTranslated: 1
+      translatedFrom: Total VR Score
+  - key: Row3_Z_TextTMP
+    sourceText: Z
+    origin: Canvas/Device Pairing/Keyboard/Row 3/Z/Text (TMP)
+    translations:
+    - languageCode: es
+      value: z
+      machineTranslated: 1
+      translatedFrom: Z
+  - key: 5_Highlight_TextTMP1
+    sourceText: 1
+    origin: Canvas/LoginPanel/Numpad/Row1/5/Highlight/Text (TMP) (1)
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Row1_Q_TextTMP
+    sourceText: Q
+    origin: Canvas/Device Pairing/Keyboard/Row 1/Q/Text (TMP)
+    translations:
+    - languageCode: es
+      value: q
+      machineTranslated: 1
+      translatedFrom: Q
+  - key: 7_Highlight_TextTMP1
+    sourceText: 1
+    origin: Canvas/LoginPanel/Numpad/Row2/7/Highlight/Text (TMP) (1)
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Summary_Values_AssessmentAttemptsVal
+    sourceText: 1
+    origin: Canvas/ContentManager/Layout/Content/Progress/Summary/Values/Assessment
+      Attempts-Val
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Canvas_DevicePairing_SetupText
+    sourceText: 'SETUP
+
+'
+    origin: Canvas/Device Pairing/Setup-Text
+    translations:
+    - languageCode: es
+      value: "CONFIGURACI\xD3N"
+      machineTranslated: 1
+      translatedFrom: 'SETUP
+
+'
+  - key: 4_Highlight_TextTMP1
+    sourceText: 1
+    origin: Canvas/LoginPanel/Numpad/Row1/4/Highlight/Text (TMP) (1)
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Row0_1_TextTMP_Login
+    sourceText: 1
+    origin: Canvas/LoginPanel/Numpad/Row0/1/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Row2_D_TextTMP
+    sourceText: D
+    origin: Canvas/Device Pairing/Keyboard/Row 2/D/Text (TMP)
+    translations:
+    - languageCode: es
+      value: D
+      machineTranslated: 1
+      translatedFrom: D
+  - key: 8_Highlight_TextTMP1
+    sourceText: 1
+    origin: Canvas/LoginPanel/Numpad/Row2/8/Highlight/Text (TMP) (1)
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Leaderboard_LeaderboardTitle_PointTMP
+    sourceText: Points
+    origin: Canvas/ContentManager/Layout/Content/Leaderboard/Leaderboard-Title/Point
+      (TMP)
+    translations:
+    - languageCode: es
+      value: Agujas
+      machineTranslated: 1
+      translatedFrom: Points
+  - key: Canvas1_MessageHandler_TextTMP
+    sourceText: New Text
+    origin: API-Manager/Canvas (1)/MessageHandler/Text (TMP)
+    translations:
+    - languageCode: es
+      value: Nuevo texto
+      machineTranslated: 1
+      translatedFrom: New Text
+  - key: Summary_Title_GuidedAttempts
+    sourceText: Guided Attempts
+    origin: Canvas/ContentManager/Layout/Content/Progress/Summary/Title/GuidedAttempts
+    translations:
+    - languageCode: es
+      value: Intentos guiados
+      machineTranslated: 1
+      translatedFrom: Guided Attempts
+  - key: Canvas_DevicePairing_Version
+    sourceText: v 1.0.0
+    origin: Canvas/Device Pairing/Version
+    translations:
+    - languageCode: es
+      value: "versi\xF3n 1.0.0"
+      machineTranslated: 1
+      translatedFrom: v 1.0.0
+  - key: Row1_6_TextTMP
+    sourceText: 6
+    origin: Canvas/LoginPanel/Numpad/Row1/6/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 6
+      machineTranslated: 1
+      translatedFrom: 6
+  - key: Summary_Values_TotalScoreVal
+    sourceText: 1
+    origin: Canvas/ContentManager/Layout/Content/Progress/Summary/Values/Total Score-Val
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Summary_Title_TotalAttempts
+    sourceText: Total Attempts
+    origin: Canvas/ContentManager/Layout/Content/Progress/Summary/Title/TotalAttempts
+    translations:
+    - languageCode: es
+      value: Intentos totales
+      machineTranslated: 1
+      translatedFrom: Total Attempts
+  - key: Row2_K_TextTMP
+    sourceText: K
+    origin: Canvas/Device Pairing/Keyboard/Row 2/K/Text (TMP)
+    translations:
+    - languageCode: es
+      value: k
+      machineTranslated: 1
+      translatedFrom: K
+  - key: Row3_BACKSPACE_TextTMP
+    sourceText: BACKSPACE
+    origin: Canvas/Device Pairing/Keyboard/Row 3/BACKSPACE/Text (TMP)
+    translations:
+    - languageCode: es
+      value: RETROCESO
+      machineTranslated: 1
+      translatedFrom: BACKSPACE
+  - key: DevicePairing_RegisterButton_TextTMP
+    sourceText: 'Register Device
+
+'
+    origin: Canvas/Device Pairing/Register Button/Text (TMP)
+    translations:
+    - languageCode: es
+      value: Registrar dispositivo
+      machineTranslated: 1
+      translatedFrom: 'Register Device
+
+'
+  - key: Row0_3_TextTMP_Login
+    sourceText: 3
+    origin: Canvas/LoginPanel/Numpad/Row0/3/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 3
+      machineTranslated: 1
+      translatedFrom: 3
+  - key: Canvas_LoginPanel_WelcomeText
+    sourceText: 'Welcome To '
+    origin: Canvas/LoginPanel/WelcomeText
+    translations:
+    - languageCode: es
+      value: Bienvenido a
+      machineTranslated: 1
+      translatedFrom: 'Welcome To '
+  - key: Row0_2_TextTMP_Login
+    sourceText: 2
+    origin: Canvas/LoginPanel/Numpad/Row0/2/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 2
+      machineTranslated: 1
+      translatedFrom: 2
+  - key: SideBar_Progress_TextTMP
+    sourceText: Progress
+    origin: Canvas/ContentManager/Layout/SideBar/Progress/Text (TMP)
+    translations:
+    - languageCode: es
+      value: Progreso
+      machineTranslated: 1
+      translatedFrom: Progress
+  - key: Row2_8_TextTMP
+    sourceText: 8
+    origin: Canvas/LoginPanel/Numpad/Row2/8/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 8
+      machineTranslated: 1
+      translatedFrom: 8
+  - key: Row1_Y_TextTMP
+    sourceText: Y
+    origin: Canvas/Device Pairing/Keyboard/Row 1/Y/Text (TMP)
+    translations:
+    - languageCode: es
+      value: Y
+      machineTranslated: 1
+      translatedFrom: Y
+  - key: Row2_F_TextTMP
+    sourceText: F
+    origin: Canvas/Device Pairing/Keyboard/Row 2/F/Text (TMP)
+    translations:
+    - languageCode: es
+      value: F
+      machineTranslated: 1
+      translatedFrom: F
+  - key: Summary_Title_AssessmentAttempts
+    sourceText: Assessment Attempts
+    origin: Canvas/ContentManager/Layout/Content/Progress/Summary/Title/Assessment
+      Attempts
+    translations:
+    - languageCode: es
+      value: "Intentos de evaluaci\xF3n"
+      machineTranslated: 1
+      translatedFrom: Assessment Attempts
+  - key: Row1_T_TextTMP
+    sourceText: T
+    origin: Canvas/Device Pairing/Keyboard/Row 1/T/Text (TMP)
+    translations:
+    - languageCode: es
+      value: t
+      machineTranslated: 1
+      translatedFrom: T
+  - key: Row1_P_TextTMP
+    sourceText: P
+    origin: Canvas/Device Pairing/Keyboard/Row 1/P/Text (TMP)
+    translations:
+    - languageCode: es
+      value: PAG
+      machineTranslated: 1
+      translatedFrom: P
+  - key: Row1_5_TextTMP
+    sourceText: 5
+    origin: Canvas/LoginPanel/Numpad/Row1/5/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 5
+      machineTranslated: 1
+      translatedFrom: 5
+  - key: Canvas_ProgressBarHandler_Title
+    sourceText: Process
+    origin: Canvas/ProgressBarHandler/Title
+    translations:
+    - languageCode: es
+      value: Proceso
+      machineTranslated: 1
+      translatedFrom: Process
+  - key: Row0_8_TextTMP
+    sourceText: 8
+    origin: Canvas/Device Pairing/Keyboard/Row 0/8/Text (TMP)
+    translations:
+    - languageCode: es
+      value: 8
+      machineTranslated: 1
+      translatedFrom: 8
+  - key: Summary_Title_TimeSpent
+    sourceText: Total Time Spent(Mins)
+    origin: Canvas/ContentManager/Layout/Content/Progress/Summary/Title/TimeSpent
+    translations:
+    - languageCode: es
+      value: Tiempo total invertido (minutos)
+      machineTranslated: 1
+      translatedFrom: Total Time Spent(Mins)
+  - key: 1_Highlight_TextTMP1
+    sourceText: 1
+    origin: Canvas/LoginPanel/Numpad/Row0/1/Highlight/Text (TMP) (1)
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: SideBar_Sim_TextTMP
+    sourceText: Simulations
+    origin: Canvas/ContentManager/Layout/SideBar/Sim/Text (TMP)
+    translations:
+    - languageCode: es
+      value: Simulaciones
+      machineTranslated: 1
+      translatedFrom: Simulations
+  - key: Content_Progress_TextTMP1
+    sourceText: Progress Summary
+    origin: Canvas/ContentManager/Layout/Content/Progress/Text (TMP) (1)
+    translations:
+    - languageCode: es
+      value: Resumen de progreso
+      machineTranslated: 1
+      translatedFrom: Progress Summary
+  - key: ENTER_Highlight_TextTMP1
+    sourceText: 1
+    origin: Canvas/LoginPanel/Numpad/Row3/ENTER/Highlight/Text (TMP) (1)
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: 2_Highlight_TextTMP1
+    sourceText: 1
+    origin: Canvas/LoginPanel/Numpad/Row0/2/Highlight/Text (TMP) (1)
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Canvas_ProgressBarHandler_Status
+    sourceText: status
+    origin: Canvas/ProgressBarHandler/Status
+    translations:
+    - languageCode: es
+      value: estado
+      machineTranslated: 1
+      translatedFrom: status
+  - key: Canvas_LoginPanel_Version
+    sourceText: v0.1
+    origin: Canvas/LoginPanel/Version
+    translations:
+    - languageCode: es
+      value: v0.1
+      machineTranslated: 1
+      translatedFrom: v0.1
+  - key: Row3_X_TextTMP
+    sourceText: X
+    origin: Canvas/Device Pairing/Keyboard/Row 3/X/Text (TMP)
+    translations:
+    - languageCode: es
+      value: "inc\xF3gnita"
+      machineTranslated: 1
+      translatedFrom: X
+  - key: Summary_Values_TotalAttemptsVal
+    sourceText: 1
+    origin: Canvas/ContentManager/Layout/Content/Progress/Summary/Values/TotalAttempts-Val
+    translations:
+    - languageCode: es
+      value: 1
+      machineTranslated: 1
+      translatedFrom: 1
+  - key: Row2_H_TextTMP
+    sourceText: H
+    origin: Canvas/Device Pairing/Keyboard/Row 2/H/Text (TMP)
+    translations:
+    - languageCode: es
+      value: h
+      machineTranslated: 1
+      translatedFrom: H
+  - key: Row2_G_TextTMP
+    sourceText: G
+    origin: Canvas/Device Pairing/Keyboard/Row 2/G/Text (TMP)
+    translations:
+    - languageCode: es
+      value: GRAMO
+      machineTranslated: 1
+      translatedFrom: G
+  - key: Content_Leaderboard_TextTMP
+    sourceText: Leaderboard
+    origin: Canvas/ContentManager/Layout/Content/Leaderboard/Text (TMP)
+    translations:
+    - languageCode: es
+      value: "Tabla de clasificaci\xF3n"
+      machineTranslated: 1
+      translatedFrom: Leaderboard
+  - key: LanguageButtonen_Select_TextTMP
+    sourceText: Select
+    origin: Canvas/LanguageSelector/Scroll View/Viewport/Content/LanguageButton_en/Select/Text
+      (TMP)
+    translations:
+    - languageCode: es
+      value: Seleccionar
+      machineTranslated: 1
+      translatedFrom: Select
+  - key: Content_LanguageButtones_Title
+    sourceText: Espanol
+    origin: Canvas/LanguageSelector/Scroll View/Viewport/Content/LanguageButton_es/Title
+    translations:
+    - languageCode: es
+      value: "espa\xF1ol"
+      machineTranslated: 1
+      translatedFrom: Espanol
+  - key: Content_LanguageButtonen_Title
+    sourceText: English
+    origin: Canvas/LanguageSelector/Scroll View/Viewport/Content/LanguageButton_en/Title
+    translations:
+    - languageCode: es
+      value: "Ingl\xE9s"
+      machineTranslated: 1
+      translatedFrom: English
+  - key: LanguageButtones_Select_TextTMP
+    sourceText: Select
+    origin: Canvas/LanguageSelector/Scroll View/Viewport/Content/LanguageButton_es/Select/Text
+      (TMP)
+    translations:
+    - languageCode: es
+      value: Seleccionar
+      machineTranslated: 1
+      translatedFrom: Select
+  - key: ModulePrefabNew_Select_TextTMP
+    sourceText: Select
+    origin: Canvas/ContentManager/Layout/Content/Modules/Scroll View/Viewport/Content/ModulePrefabNew(Clone)/Select/Text
+      (TMP)
+    translations:
+    - languageCode: es
+      value: Seleccionar
+      machineTranslated: 1
+      translatedFrom: Select
+  - key: Content_ModulePrefabNew_Title
+    sourceText: FFS
+    origin: Canvas/ContentManager/Layout/Content/Modules/Scroll View/Viewport/Content/ModulePrefabNew(Clone)/Title
+    translations:
+    - languageCode: es
+      value: FFS
+      machineTranslated: 1
+      translatedFrom: FFS
+  - key: ScrollView_LeaderboardTile_NameTMP
+    sourceText: Arye Ramrajkar
+    origin: Canvas/ContentManager/Layout/Content/Leaderboard/Scroll View/Leaderboard-Tile(Clone)/Name(TMP)
+    translations:
+    - languageCode: es
+      value: Arye Ramrajkar
+      machineTranslated: 1
+      translatedFrom: Arye Ramrajkar
+  - key: ScrollView_LeaderboardTile_NoTMP
+    sourceText: 5
+    origin: Canvas/ContentManager/Layout/Content/Leaderboard/Scroll View/Leaderboard-Tile(Clone)/No
+      (TMP)
+    translations:
+    - languageCode: es
+      value: 5
+      machineTranslated: 1
+      translatedFrom: 5
+  - key: ScrollView_LeaderboardTile_PointTMP
+    sourceText: 637
+    origin: Canvas/ContentManager/Layout/Content/Leaderboard/Scroll View/Leaderboard-Tile(Clone)/Point
+      (TMP)
+    translations:
+    - languageCode: es
+      value: 637
+      machineTranslated: 1
+      translatedFrom: 637
+  - key: ScrollView_LeaderboardTile_PointTMP
+    sourceText: 637
+    origin: Canvas/ContentManager/Layout/Content/Leaderboard/Scroll View/Leaderboard-Tile(Clone)/Point
+      (TMP)
+    translations:
+    - languageCode: es
+      value: 637
+      machineTranslated: 1
+      translatedFrom: 637
+  - key: NewLoginManager_WelcomeTo
+    sourceText: 'Welcome To  '
+    origin: NewLoginManager
+    translations:
+    - languageCode: es
+      value: 'Bienvenido a '
+      machineTranslated: 1
+      translatedFrom: 'Welcome To  '
+  - key: NewLoginManager_AutoLogin
+    sourceText: Auto Login
+    origin: NewLoginManager
+    translations:
+    - languageCode: es
+      value: "Inicio de sesi\xF3n autom\xE1tico"
+      machineTranslated: 1
+      translatedFrom: Auto Login
+  - key: NewLoginManager_InvalidCode
+    sourceText: 'Invalid Code: Must be 6 digit.'
+    origin: NewLoginManager
+    translations:
+    - languageCode: es
+      value: "C\xF3digo no v\xE1lido: Debe tener 6 d\xEDgitos."
+      machineTranslated: 1
+      translatedFrom: 'Invalid Code: Must be 6 digit.'
+  - key: NewLoginManager_LoginSucessfully
+    sourceText: Login Sucessfully
+    origin: NewLoginManager
+    translations:
+    - languageCode: es
+      value: "Iniciar sesi\xF3n correctamente"
+      machineTranslated: 1
+      translatedFrom: Login Sucessfully
+  - key: NewLoginManager_FailedToLogin
+    sourceText: Failed to Login!
+    origin: NewLoginManager
+    translations:
+    - languageCode: es
+      value: "No se pudo iniciar sesi\xF3n!"
+      machineTranslated: 1
+      translatedFrom: Failed to Login!
+  - key: ContentManager_Hello
+    sourceText: 'Hello  '
+    origin: ContentManager
+    translations:
+    - languageCode: es
+      value: 'Hola '
+      machineTranslated: 1
+      translatedFrom: 'Hello  '
+  - key: ContentManager_Downloading
+    sourceText: 'Downloading '
+    origin: ContentManager
+    translations:
+    - languageCode: es
+      value: 'Descargando '
+      machineTranslated: 1
+      translatedFrom: 'Downloading '
+  - key: ContentManager_Download
+    sourceText: 'Download '
+    origin: ContentManager
+    translations:
+    - languageCode: es
+      value: Descargar
+      machineTranslated: 1
+      translatedFrom: 'Download '
+  - key: ContentManager_Launching
+    sourceText: 'Launching '
+    origin: ContentManager
+    translations:
+    - languageCode: es
+      value: Lanzamiento
+      machineTranslated: 1
+      translatedFrom: 'Launching '
+  - key: ContentManager_Launch
+    sourceText: 'Launch '
+    origin: ContentManager
+    translations:
+    - languageCode: es
+      value: Lanzamiento
+      machineTranslated: 1
+      translatedFrom: 'Launch '
+  - key: ContentManager_WaitResponse
+    sourceText: Wait for the Existing Progress Completion!
+    origin: ContentManager
+    translations:
+    - languageCode: es
+      value: Espere a que se complete el progreso existente!
+      machineTranslated: 1
+      translatedFrom: Wait for the Existing Progress Completion!
+  - key: ContentManager_WaitResponse
+    sourceText: Wait for the Existing Progress Completion!
+    origin: ContentManager
+    translations:
+    - languageCode: es
+      value: Espere a que se complete el progreso existente!
+      machineTranslated: 1
+      translatedFrom: Wait for the Existing Progress Completion!
+  - key: ContentManager_Completed
+    sourceText: Completed
+    origin: ContentManager
+    translations:
+    - languageCode: es
+      value: Terminado
+      machineTranslated: 1
+      translatedFrom: Completed
+  - key: ContentManager_Failed
+    sourceText: Failed
+    origin: ContentManager
+    translations:
+    - languageCode: es
+      value: Fallido
+      machineTranslated: 1
+      translatedFrom: Failed
+  - key: ContentManager_Failed
+    sourceText: Failed
+    origin: ContentManager
+    translations:
+    - languageCode: es
+      value: Fallido
+      machineTranslated: 1
+      translatedFrom: Failed
+  - key: Progress_Step
+    sourceText: Step
+    origin: ContentManager
+    translations:
+    - languageCode: es
+      value: Paso
+      machineTranslated: 1
+      translatedFrom: Step

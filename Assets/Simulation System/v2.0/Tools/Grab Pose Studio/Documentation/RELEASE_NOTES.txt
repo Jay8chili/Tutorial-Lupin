@@ -1,0 +1,43 @@
+Grab Pose Studio
+Version: 1.1.2
+Release Date: 12 August 2026
+
+Features
+--------
+• Launch Studio from Edit Mode
+• Automatic Play Mode launch
+• Runtime GrabInteraction discovery, refreshed live (0.5s poll) — enabling/
+  disabling a grab at runtime updates the navigation list automatically
+• Previous / Next navigation
+• Runtime controller pose recording
+• World-space recording status panel
+• Studio platform (8x8m) with a teleport-back safety net — walking past the
+  edge snaps the rig back to centre
+• Hand-touch Exit Play Mode button on the status panel, with haptic +
+  press-animation feedback, shown once every tracked grab has both Left and
+  Right poses covered (recorded this session or already on disk)
+• Build Settings guard with one-click auto-add
+• RecordedPoses/ folder auto-created on first recording
+
+Fixed in 1.1.2 — found integrating into a second simulation project
+--------------------------------------------------------------------
+• Floor lookup was a global Find, which could match a same-named object in
+  another loaded scene — now scoped to the Studio scene only
+• XR Rig teleports (entry + safety-net recentre) now disable/re-enable
+  CharacterController around the move, matching TeleportManager's pattern
+
+Fixed in 1.1.1
+--------------
+• Exit button used UGUI/XRI raycasting, which this rig doesn't drive — switched
+  to CustomButton + trigger BoxCollider, the SDK's standard hand-touch pattern
+• NullReferenceException in a runtime-added CustomButton's UnityEvent fields
+  (no field initializer) was silently aborting the whole panel's construction
+• Status panel billboard rolled/tilted with head movement — locked to world-up
+• Exit button hold time cut from 1s to 0.15s for an instant-tap feel
+
+Limitations
+-----------
+• Controller recording only — no hand tracking
+• Manual pose assignment
+• Manual bake
+• No pose visualization
