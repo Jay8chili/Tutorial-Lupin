@@ -104,7 +104,14 @@ public class SimulationManager : MonoBehaviour
                 break;
 
             case StartupOverride.SkipIntro:
-                setModeUI.SetActive(true);
+                if (setModeUI != null)
+                {
+                    setModeUI.SetActive(true);
+                }
+                else
+                {
+                    SetMode(0);  
+                }
                 break;
 
             case StartupOverride.None:
@@ -400,9 +407,10 @@ public class SimulationManager : MonoBehaviour
             SetSimulationType(SimulationMode.Assessment);
         else if (value == 2)
             SetSimulationType(SimulationMode.FreeRoam); ;
-
-        setModeUI.SetActive(false);
-
+        if (setModeUI != null)
+        {
+            setModeUI.SetActive(false);
+        }
         string mode;
         foreach (var states in states)
         {
@@ -495,8 +503,11 @@ public class SimulationManager : MonoBehaviour
     private async void StartSession()
     {
         await Task.Delay(2000);
-        setModeUI.SetActive(false);
 
+        if (setModeUI != null)
+        {
+            setModeUI.SetActive(false);
+        }
 
         //ConfigureScenarioSteps();
 

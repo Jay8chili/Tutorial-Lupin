@@ -137,7 +137,10 @@ namespace SimulationSystem.V02.Extensions
             {
             }
         }
-
+        public void injectFadeTime(float FadeTime)
+        {
+            fadeTime= FadeTime ;
+        }
         /// <summary>
         /// Show a text message on the black sphere (only visible while faded out).
         /// Fades the text in over a short duration.

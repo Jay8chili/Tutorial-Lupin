@@ -141,7 +141,10 @@ public class SessionManager : MonoBehaviour
     IEnumerator DelayScaleup()
     {
         yield return new WaitForSeconds(2f);
-        SimulationManager.Instance.setModeUI.SetActive(true);
+        if (SimulationManager.Instance.setModeUI != null)
+        {
+            SimulationManager.Instance.setModeUI.SetActive(true);
+        }
     }
 
     IEnumerator ScaleupAndDown(float delayTime=2f)
