@@ -1,7 +1,8 @@
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.XR.Hands;
 
-namespace UnityEngine.XR.Templates.MR
+namespace Unity.VRTemplate
 {
     /// <summary>
     /// This class is a convenience wrapper to handle external start/stop
@@ -10,7 +11,7 @@ namespace UnityEngine.XR.Templates.MR
     /// <seealso cref="XRHandSubsystem"/>
     public class HandSubsystemManager : MonoBehaviour
     {
-        static readonly List<XRHandSubsystem> s_HandSubsystems = new List<XRHandSubsystem>();
+        static List<XRHandSubsystem> s_HandSubsystems;
         XRHandSubsystem m_HandSubsystem;
 
         void OnEnable()
@@ -49,7 +50,7 @@ namespace UnityEngine.XR.Templates.MR
         // has been made publicly available.
         static bool TryGetHandSubsystem(out XRHandSubsystem handSubsystem)
         {
-            s_HandSubsystems.Clear();
+            s_HandSubsystems ??= new List<XRHandSubsystem>();
             SubsystemManager.GetSubsystems(s_HandSubsystems);
             if (s_HandSubsystems.Count == 0)
             {

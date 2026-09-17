@@ -20,13 +20,13 @@ namespace SimulationSystem.V02.StateInteractions
         [Header("Gaze Settings")]
 
         [Tooltip("Radius of the SphereCast used for gaze detection at distance. Smaller values require more precise gaze, larger values are more forgiving.")]
-        private readonly float sphereCastRadius = 0.2f;
+        private readonly float sphereCastRadius = 0.1f;
 
         [Tooltip("Maximum distance the SphereCast will travel forward from the camera. Objects beyond this distance will not be detected.")]
-        private readonly float sphereCastDistance = 10f;
+        private readonly float sphereCastDistance = 50f;
 
         [Tooltip("The radius around the object within which interaction is permitted. Moving outside this radius suspends the interaction and locks it until the user re-enters.")]
-        private readonly float proximityRadius = 4f;
+        private readonly float proximityRadius = 50f;
 
         [Header("Radial Progress UI")]
         public RadialInteractionUI radialUI;

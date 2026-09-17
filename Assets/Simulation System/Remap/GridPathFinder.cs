@@ -266,9 +266,7 @@ public class GridPathfinder : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if (!drawPathGizmos || lastSmoothPath == null || lastSmoothPath.Count < 2)
-            return;
-
+    
         Gizmos.color = pathColor;
 
         for (int i = 1; i < lastSmoothPath.Count; i++)

@@ -25,7 +25,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 8f3a84e84dcd995498811f032688ada9, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -101,8 +101,8 @@ Material:
     - _DissolveAmount: 0
     - _DstBlend: 0
     - _DstBlendAlpha: 0
-    - _EdgeIntensity: 6
-    - _EdgeWidth: 0.04
+    - _EdgeIntensity: 2.9
+    - _EdgeWidth: 0
     - _EnvironmentReflections: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
